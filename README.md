@@ -1,11 +1,21 @@
-# nwpc-workflow-log-model
+# nwpc-workflow-log-tool
 
-A database model for workflow log in NWPC.
+A workflow log tool for operation systems in NWPC.
 
 ## Introduction
 
-Use MongoDB to store analytics results including node tree and node status.
+Analysis SMS and ecFlow logs.
 
-- `blob`: Base class for all MongoDB documents.
-- `NodeTreeBlob`: blob for node tree.
-- `NodeStatusBlob`: blob for node status.
+## Usage
+
+Collect from log files and store in MySQL using `nwpc-workflow-log-collector`.
+
+Process log records from log files or MySQL using processors in `nwpc-workflow-log-processor`.
+
+Generate time line chart using complied `time_line_chart_tool.js` in `nwpc-workflow-log-chart`.
+
+## LICENSE
+
+Copyright &copy; 2017-2018, Perilla Roc.
+
+`nwpc-monitor-platform` is licensed under [GPL v3.0](LICENSE.md)
