@@ -1,21 +1,36 @@
-# nwpc-workflow-log-tool
+# nwpc-workflow-log-model
 
-A workflow log tool for operation systems in NWPC.
+A database model for workflow log in NWPC.
 
 ## Introduction
 
-Analysis SMS and ecFlow logs.
+Model classes for MongoDB and relational database.
 
-## Usage
+## MongoDB
 
-Collect from log files and store in MySQL using `nwpc-workflow-log-collector`.
+Use MongoDB to store analytics results including node tree and node status.
 
-Process log records from log files or MySQL using processors in `nwpc-workflow-log-processor`.
+- `blob`: Base class for all MongoDB documents.
+- `NodeTreeBlob`: blob for node tree.
+- `NodeStatusBlob`: blob for node status.
 
-Generate time line chart using complied `time_line_chart_tool.js` in `nwpc-workflow-log-chart`.
+## relational database
+
+- `owner`: Owner table
+- `repo`: Repo table
+- `SmsRepo`: Repo for SMS
+- `EcflowRepo`: Repo for ecFlow
+- `RepoVersion`: Repo versions
+- `RecordBase`: base class for Records
+- `SmsRecord`: SMS records
+- `EcflowRecord`: ecFlow records
+
+## Tool
+
+use `creat_tables.py` to create all tables for NWPC Operation Systems in MySQL.
 
 ## LICENSE
 
-Copyright &copy; 2017-2020, perillaroc at nwpc-oper.
+Copyright &copy; 2018-2020, perillaroc at nwpc-oper.
 
-`nwpc-monitor-platform` is licensed under [GPL v3.0](LICENSE.md)
+`nwpc-workflow-log-model` is licensed under [GPL v3.0](LICENSE.md)
