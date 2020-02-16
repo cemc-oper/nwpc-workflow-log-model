@@ -123,22 +123,21 @@ class EcflowLogRecord(LogRecord):
                 #  try-no: 1 reason: trap
                 self.node_path = status_line[start_pos:end_pos]
                 self.additional_information = status_line[end_pos + 1:]
+        elif command in ("unknown",):
+            # just ignore
+            pass
+        elif command == "":
+            # MSG:[04:39:45 18.7.2019]  :nwp
+            pass
+        elif command.strip()[0].isupper():
+            pass
+        elif command[0] == "[":
+            # WAR:[09:16:14 8.8.2018]  [ overloaded || --abort*2 ] (pid & password match) : chd:abort
+            #  : /grapes_emer_v1_1/12/plot/plot_wind : already aborted : action(fob)
+            pass
         else:
-            if command in ("unknown",):
-                # just ignore
-                pass
-            elif command == "":
-                # MSG:[04:39:45 18.7.2019]  :nwp
-                pass
-            elif command.strip()[0].isupper():
-                pass
-            elif command[0] == "[":
-                # WAR:[09:16:14 8.8.2018]  [ overloaded || --abort*2 ] (pid & password match) : chd:abort
-                #  : /grapes_emer_v1_1/12/plot/plot_wind : already aborted : action(fob)
-                pass
-            else:
-                self.command = command
-                # print("[ERROR] status record: command not supported =>", self.log_record)
+            self.command = command
+            # print("[ERROR] status record: command not supported =>", self.log_record)
 
     def _parse_child_record(self, child_line: str):
         """
@@ -188,9 +187,7 @@ class EcflowLogRecord(LogRecord):
                 # print("[ERROR] child record: parse error =>", self.log_record)
                 pass
         else:
-            logger.error(
-                "[ERROR] child record: command not supported =>", self.log_record
-            )
+            logger.error("child record: command not supported =>", self.log_record)
 
     def _parse_client_record(self, line: str):
         """
