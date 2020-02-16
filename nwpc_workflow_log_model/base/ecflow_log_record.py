@@ -1,15 +1,24 @@
-# coding: utf-8
 from datetime import datetime
+from enum import Enum
+
 from loguru import logger
 
-from nwpc_workflow_log_model.base.log_record import LogRecord
+from nwpc_workflow_log_model.base.log_record import LogRecord, LogType
+
+
+class CommandType(Enum):
+    Status = "status"
+    Client = "client"
+    Child = "child"
+    Server = "server"
+    Unknown = "unknown"
 
 
 class EcflowLogRecord(LogRecord):
     def __init__(self):
         LogRecord.__init__(self)
 
-        self.command_type = None
+        self.command_type: CommandType = CommandType.Unknown
 
     def parse(self, line: str):
         """
@@ -24,7 +33,7 @@ class EcflowLogRecord(LogRecord):
 
         start_pos = 0
         end_pos = line.find(":")
-        self.log_type = line[start_pos:end_pos]
+        self.log_type = convert_ecflow_log_type(line[start_pos:end_pos])
 
         start_pos = end_pos + 2
         end_pos = line.find("]", start_pos)
@@ -38,22 +47,22 @@ class EcflowLogRecord(LogRecord):
 
         start_pos = end_pos + 2
         if line[start_pos: start_pos + 1] == " ":
-            self.command_type = "status"
+            self.command_type = CommandType.Status
             start_pos += 1
             self._parse_status_record(line[start_pos:])
         elif line[start_pos: start_pos + 2] == "--":
-            self.command_type = "client"
+            self.command_type = CommandType.Client
             start_pos += 2
             self._parse_client_record(line[start_pos:])
         elif line[start_pos: start_pos + 4] == "chd:":
             # child
-            self.command_type = "child"
+            self.command_type = CommandType.Child
             start_pos += 4
             self._parse_child_record(line[start_pos:])
         elif line[start_pos: start_pos + 4] == "svr:":
             # server
             # print("[server command]", line)
-            self.command_type = "server"
+            self.command_type = CommandType.Server
         elif len(line[start_pos:].strip()) > 0:
             # NOTE: line[start_pos].strip() will be empty but I haven't found example line.
             if line[start_pos:].strip()[0].isupper():
@@ -69,7 +78,7 @@ class EcflowLogRecord(LogRecord):
 
         return self
 
-    def _parse_status_record(self, status_line):
+    def _parse_status_record(self, status_line: str):
         """
         active: /swfdp/00/deterministic/base/024/SWFDP_CA/CIN_SWFDP_CA_sep_024
         """
@@ -113,7 +122,7 @@ class EcflowLogRecord(LogRecord):
                 self.command = command
                 # print("[ERROR] status record: command not supported =>", self.log_record)
 
-    def _parse_child_record(self, child_line):
+    def _parse_child_record(self, child_line: str):
         start_pos = 0
         end_pos = child_line.find(" ", start_pos)
         if end_pos == -1:
@@ -150,7 +159,7 @@ class EcflowLogRecord(LogRecord):
                 "[ERROR] child record: command not supported =>", self.log_record
             )
 
-    def _parse_client_record(self, child_line):
+    def _parse_client_record(self, child_line: str):
         start_pos = 0
         end_pos = child_line.find(" ", start_pos)
         if end_pos == -1:
@@ -258,3 +267,14 @@ class EcflowLogRecord(LogRecord):
         else:
             self.command = command
             # print("[ERROR] client record: command not supported =>", self.log_record)
+
+
+def convert_ecflow_log_type(log_type: str) -> LogType:
+    log_type_mapper = {
+        "LOG": LogType.Log,
+        "MSG": LogType.Message,
+        "DBG": LogType.Debug,
+        "ERR": LogType.Error,
+        "WAR": LogType.Warning,
+    }
+    return log_type_mapper.get(log_type, LogType.Unknown)

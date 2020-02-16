@@ -5,6 +5,12 @@ from nwpc_workflow_log_model.base.log_record import LogRecord
 
 
 class SmsLogRecord(LogRecord):
+    """
+    Notes
+    -----
+    SMS is only used for legacy systems in NWPC.
+    So SMS log record is not maintained.
+    """
     def __init__(self):
         LogRecord.__init__(self)
 
