@@ -33,17 +33,14 @@ class EcflowLogRecord(LogRecord):
 
         start_pos = 0
         end_pos = line.find(":")
-        self.log_type = convert_ecflow_log_type(line[start_pos:end_pos])
+        self._parse_log_type(line[start_pos:end_pos])
 
         start_pos = end_pos + 2
         end_pos = line.find("]", start_pos)
         if end_pos == -1:
             logger.warning("can't find date and time => ", line)
             return
-        record_time_string = line[start_pos:end_pos]
-        date_time = datetime.strptime(record_time_string, "%H:%M:%S %d.%m.%Y")
-        self.date = date_time.date()
-        self.time = date_time.time()
+        self._parse_datetime(line[start_pos:end_pos])
 
         start_pos = end_pos + 2
         if line[start_pos: start_pos + 1] == " ":
@@ -55,7 +52,7 @@ class EcflowLogRecord(LogRecord):
             start_pos += 2
             self._parse_client_record(line[start_pos:])
         elif line[start_pos: start_pos + 4] == "chd:":
-            # child
+            # child command
             self.command_type = CommandType.Child
             start_pos += 4
             self._parse_child_record(line[start_pos:])
@@ -78,9 +75,30 @@ class EcflowLogRecord(LogRecord):
 
         return self
 
+    def _parse_log_type(self, token: str):
+        self.log_type = convert_ecflow_log_type(token)
+
+    def _parse_datetime(self, token: str):
+        date_time = datetime.strptime(token, "%H:%M:%S %d.%m.%Y")
+        self.date = date_time.date()
+        self.time = date_time.time()
+
     def _parse_status_record(self, status_line: str):
         """
-        active: /swfdp/00/deterministic/base/024/SWFDP_CA/CIN_SWFDP_CA_sep_024
+        Parse status record
+
+        Example:
+            LOG:[13:34:07 8.1.2020]  complete: /grapes_reps_v3_2/06/control/pre_data/psi
+            LOG:[13:34:07 8.1.2020]  complete: /grapes_reps_v3_2/06/control/pre_data
+            LOG:[13:34:07 8.1.2020]  queued: /grapes_reps_v3_2/06/control
+
+        Parameters
+        ----------
+        status_line: str
+
+        Returns
+        -------
+
         """
         start_pos = 0
         end_pos = status_line.find(":", start_pos)
@@ -123,6 +141,21 @@ class EcflowLogRecord(LogRecord):
                 # print("[ERROR] status record: command not supported =>", self.log_record)
 
     def _parse_child_record(self, child_line: str):
+        """
+        Parse child line
+
+        Example lines:
+            MSG:[13:33:57 8.1.2020] chd:init /grapes_reps_v3_2/06/members/mem09/pre_data/gmf_get/gmf_get_030
+            MSG:[14:02:38 8.1.2020] chd:meter fcstHours 0 /grapes_reps_v3_2/06/members/mem02/model/fcst_monitor
+
+        Parameters
+        ----------
+        child_line: str
+
+        Returns
+        -------
+
+        """
         start_pos = 0
         end_pos = child_line.find(" ", start_pos)
         if end_pos == -1:
@@ -159,18 +192,35 @@ class EcflowLogRecord(LogRecord):
                 "[ERROR] child record: command not supported =>", self.log_record
             )
 
-    def _parse_client_record(self, child_line: str):
+    def _parse_client_record(self, line: str):
+        """
+        Parse client record
+
+        Example
+            MSG:[06:35:57 12.1.2020] --force=complete /grapes_geps_v1_2/00/members/pair_05/mem02/model/forecast  :nwp
+            MSG:[13:30:29 8.1.2020] --news=0 1 0  :nwp [:NO_NEWS]
+            MSG:[13:30:35 8.1.2020] --server_version :nwp
+            MSG:[13:30:35 8.1.2020] --sync_full=0 :nwp
+
+        Parameters
+        ----------
+        line: str
+
+        Returns
+        -------
+
+        """
         start_pos = 0
-        end_pos = child_line.find(" ", start_pos)
+        end_pos = line.find(" ", start_pos)
         if end_pos == -1:
             # print("[ERROR] client record: command not found =>", self.log_record)
             return
-        command = child_line[start_pos:end_pos]
+        command = line[start_pos:end_pos]
 
         if command == "requeue":
             self.command = command
             start_pos = end_pos + 1
-            tokens = child_line[start_pos:].split()
+            tokens = line[start_pos:].split()
             if len(tokens) == 3:
                 requeue_option = tokens[0]
                 node_path = tokens[1]
@@ -192,7 +242,7 @@ class EcflowLogRecord(LogRecord):
         ):
             self.command = command
             start_pos = end_pos + 1
-            tokens = child_line[start_pos:].split()
+            tokens = line[start_pos:].split()
             user = tokens[-1]
             node_path = tokens[-2]
             self.node_path = node_path
@@ -200,7 +250,7 @@ class EcflowLogRecord(LogRecord):
         elif command.startswith("force="):
             self.command = "force"
             start_pos = end_pos + 1
-            tokens = child_line[start_pos:].split()
+            tokens = line[start_pos:].split()
             node_path = tokens[-2]
             user = tokens[-1]
             self.node_path = node_path
@@ -210,31 +260,31 @@ class EcflowLogRecord(LogRecord):
             node_path = command[5:]
             self.node_path = node_path
             start_pos = end_pos + 1
-            self.additional_information = child_line[start_pos:]
+            self.additional_information = line[start_pos:]
         elif command.startswith("load="):
             self.command = "load"
             node_path = command[5:]
             self.node_path = node_path
             start_pos = end_pos + 1
-            self.additional_information = child_line[start_pos:]
+            self.additional_information = line[start_pos:]
         elif command.startswith("begin="):
             self.command = "begin"
             node_path = command[6:]
             self.node_path = node_path
             start_pos = end_pos + 1
-            self.additional_information = child_line[start_pos:]
+            self.additional_information = line[start_pos:]
         elif command.startswith("replace="):
             self.command = "replace"
             node_path = command[5:]
             self.node_path = node_path
             start_pos = end_pos + 1
-            self.additional_information = child_line[start_pos:]
+            self.additional_information = line[start_pos:]
         elif command.startswith("order="):
             self.command = "order"
             node_path = command[6:]
             self.node_path = node_path
             start_pos = end_pos + 1
-            self.additional_information = child_line[start_pos:]
+            self.additional_information = line[start_pos:]
         elif command in (
                 "restart",
                 "suites",
