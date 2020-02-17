@@ -21,7 +21,7 @@ class LogRecord(object):
         self.time: time or None = None
         self.command: str or None = None
         self.node_path: str or None = None
-        self.additional_information = None
+        self.additional_attrs: dict = {}
         self.log_record: str or None = None
 
     def parse(self, line: str):

@@ -91,6 +91,7 @@ class EcflowLogRecord(LogRecord):
             LOG:[13:34:07 8.1.2020]  complete: /grapes_reps_v3_2/06/control/pre_data/psi
             LOG:[13:34:07 8.1.2020]  complete: /grapes_reps_v3_2/06/control/pre_data
             LOG:[13:34:07 8.1.2020]  queued: /grapes_reps_v3_2/06/control
+            LOG:[17:38:08 28.1.2020]  submitted: /grapes_geps_v1_2/12/members/pair_06/mem02/geps2tigge/geps2tigge_054 job_size:31866
 
         Parameters
         ----------
@@ -111,7 +112,7 @@ class EcflowLogRecord(LogRecord):
             return
         command = status_line[start_pos:end_pos]
 
-        if command in ("submitted", "active", "queued", "complete", "aborted"):
+        if command in ("active", "queued", "complete", "aborted"):
             self.command = command
             start_pos = end_pos + 2
             end_pos = status_line.find(" ", start_pos)
@@ -122,7 +123,16 @@ class EcflowLogRecord(LogRecord):
                 # LOG:[11:09:31 20.9.2018]  aborted: /grapes_meso_3km_post/06/tograph/3h/prep_3h_10mw/plot_hour_030
                 #  try-no: 1 reason: trap
                 self.node_path = status_line[start_pos:end_pos]
-                self.additional_information = status_line[end_pos + 1:]
+                self.additional_attrs["reason"] = status_line[end_pos + 1:]
+        elif command == "submitted":
+            # LOG:[17:38:08 28.1.2020]  submitted: /grapes_geps_v1_2/12/members/pair_06/mem02/geps2tigge/geps2tigge_054 job_size:31866
+            self.command = command
+            start_pos = end_pos + 2
+            end_pos = status_line.find(" ", start_pos)
+            self.node_path = status_line[start_pos:end_pos]
+            start_pos = end_pos + 1
+            end_pos = status_line.find(":", start_pos)
+            self.additional_attrs["job_size"] = status_line[end_pos + 1:]
         elif command in ("unknown",):
             # just ignore
             pass
@@ -173,7 +183,7 @@ class EcflowLogRecord(LogRecord):
                 # MSG:[12:22:53 19.10.2018] chd:abort
                 #  /3km_post/06/3km_togrib2/grib2WORK/030/after_data2grib2_030  trap
                 self.node_path = child_line[start_pos:end_pos]
-                self.additional_information = child_line[end_pos + 1:]
+                self.additional_attrs["reason"] = child_line[end_pos + 1:]
         elif command in ("meter", "label", "event"):
             # MSG:[09:24:06 29.6.2018] chd:event transmissiondone
             #  /gmf_grapes_025L60_v2.2_post/00/tograph/base/015/AN_AEA/QFLXDIV_P700_AN_AEA_sep_015
@@ -182,7 +192,7 @@ class EcflowLogRecord(LogRecord):
             node_path_start_pos = line.rfind(" ")
             if node_path_start_pos != -1:
                 self.node_path = line[node_path_start_pos + 1:]
-                self.additional_information = line[:node_path_start_pos]
+                self.additional_attrs["event"] = line[:node_path_start_pos]
             else:
                 # print("[ERROR] child record: parse error =>", self.log_record)
                 pass
@@ -215,6 +225,7 @@ class EcflowLogRecord(LogRecord):
         command = line[start_pos:end_pos]
 
         if command == "requeue":
+            # MSG:[07:50:49 31.1.2020] --requeue force /grapes_reps_v3_2/00/control/model/fcst_monitor  :nwp_qu
             self.command = command
             start_pos = end_pos + 1
             tokens = line[start_pos:].split()
@@ -223,7 +234,8 @@ class EcflowLogRecord(LogRecord):
                 node_path = tokens[1]
                 user = tokens[2]
                 self.node_path = node_path
-                self.additional_information = requeue_option + " " + user
+                self.additional_attrs["requeue_option"] = requeue_option
+                self.additional_attrs["user"] = user
             else:
                 # print("[ERROR] client record: requeue parse error =>", self.log_record)
                 return
@@ -237,13 +249,15 @@ class EcflowLogRecord(LogRecord):
                 "run",
                 "status",
         ):
+            # MSG:[06:45:59 12.1.2020] --alter change meter fcstHours 360 /grapes_geps_v1_2/00/members/pair_15/mem01/model/fcst_monitor  :nwp
             self.command = command
             start_pos = end_pos + 1
             tokens = line[start_pos:].split()
             user = tokens[-1]
             node_path = tokens[-2]
             self.node_path = node_path
-            self.additional_information = " ".join(tokens[:-2]) + " " + user
+            self.additional_attrs["options"] = " ".join(tokens[:-2])
+            self.additional_attrs["user"] = user
         elif command.startswith("force="):
             self.command = "force"
             start_pos = end_pos + 1
@@ -251,37 +265,44 @@ class EcflowLogRecord(LogRecord):
             node_path = tokens[-2]
             user = tokens[-1]
             self.node_path = node_path
-            self.additional_information = " ".join(tokens[-2:]) + " " + user
+            self.additional_attrs["options"] = " ".join(tokens[:-2])
+            self.additional_attrs["user"] = user
         elif command.startswith("file="):
+            # MSG:[06:54:07 13.1.2020] --file=/grapes_reps_v3_2/00/control/pre_data/gmf_get/gmf_get_000 script 10000  :operator
             self.command = "file"
             node_path = command[5:]
             self.node_path = node_path
             start_pos = end_pos + 1
-            self.additional_information = line[start_pos:]
+            tokens = line[start_pos:].split()
+            user = tokens[-1]
+            self.additional_attrs["options"] = " ".join(tokens[:-1])
+            self.additional_attrs["user"] = user
         elif command.startswith("load="):
+            # MSG:[03:14:32 19.1.2020] --load=gmf_grapes_gfs_post.def  :nwp_pd
             self.command = "load"
             node_path = command[5:]
             self.node_path = node_path
             start_pos = end_pos + 1
-            self.additional_information = line[start_pos:]
+            self.additional_attrs = line[start_pos:]
         elif command.startswith("begin="):
             self.command = "begin"
             node_path = command[6:]
             self.node_path = node_path
             start_pos = end_pos + 1
-            self.additional_information = line[start_pos:]
+            self.additional_attrs = line[start_pos:]
         elif command.startswith("replace="):
+            # MSG:[02:54:48 13.1.2020] --replace=/gmf_grapes_gfs_post gmf_grapes_gfs_post.def parent  :nwp_pd
             self.command = "replace"
             node_path = command[5:]
             self.node_path = node_path
             start_pos = end_pos + 1
-            self.additional_information = line[start_pos:]
+            self.additional_attrs = line[start_pos:]
         elif command.startswith("order="):
             self.command = "order"
             node_path = command[6:]
             self.node_path = node_path
             start_pos = end_pos + 1
-            self.additional_information = line[start_pos:]
+            self.additional_attrs = line[start_pos:]
         elif command in (
                 "restart",
                 "suites",
@@ -292,6 +313,21 @@ class EcflowLogRecord(LogRecord):
                 "ping",
                 "check_pt",
         ):
+            # MSG:[13:26:35 8.1.2020] --restart :nwp_pd
+
+            # MSG:[00:11:32 10.1.2020] --suites :nwp
+
+            # MSG:[05:42:50 9.2.2020] --stats :nwp_pd
+
+            # MSG:[00:40:04 12.2.2020] --edit_history /gda_grapes_gfs_post/12  :nwp_pd
+            # MSG:[00:40:08 12.2.2020] --edit_history /  :nwp_pd
+
+            # MSG:[07:48:03 13.2.2020] --zombie_get :nwp_pd
+
+            # MSG:[11:40:17 9.1.2020] --server_version :nwp
+
+            # MSG:[11:40:17 9.1.2020] --ping :nwp
+
             self.command = command
         elif (
                 command.startswith("sync_full=")
