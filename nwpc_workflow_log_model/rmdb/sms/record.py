@@ -3,7 +3,7 @@ import logging
 
 from nwpc_workflow_log_model.rmdb.base.model import Model
 from nwpc_workflow_log_model.rmdb.base.record import RecordBase
-from nwpc_workflow_log_model.base.sms_log_record import SmsLogRecord
+from nwpc_workflow_log_model.log_record.sms_log_record import SmsLogRecord
 
 
 logger = logging.getLogger()

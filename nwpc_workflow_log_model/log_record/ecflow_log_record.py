@@ -3,7 +3,7 @@ from enum import Enum
 
 from loguru import logger
 
-from nwpc_workflow_log_model.base.log_record import LogRecord, LogType
+from nwpc_workflow_log_model.log_record.log_record import LogRecord, LogType
 
 
 class EventType(Enum):
