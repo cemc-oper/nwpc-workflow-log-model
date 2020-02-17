@@ -250,6 +250,7 @@ class EcflowLogRecord(LogRecord):
                 "status",
         ):
             # MSG:[06:45:59 12.1.2020] --alter change meter fcstHours 360 /grapes_geps_v1_2/00/members/pair_15/mem01/model/fcst_monitor  :nwp
+            # MSG:[16:52:50 8.2.2020] --kill /meso_post/12/uploadAll/upload_togrib2/027/upload_togrib2_027  :nwp
             self.event = event
             start_pos = end_pos + 1
             tokens = line[start_pos:].split()
@@ -259,6 +260,9 @@ class EcflowLogRecord(LogRecord):
             self.additional_attrs["options"] = " ".join(tokens[:-2])
             self.additional_attrs["user"] = user
         elif event.startswith("force="):
+            # MSG:[05:55:30 9.2.2020] --force=complete recursive /grapes_meso_3km_post/12  :nwp_pd
+            # LOG:[05:55:30 9.2.2020]  complete: /grapes_meso_3km_post/12
+            # LOG:[05:55:30 9.2.2020]  complete: /grapes_meso_3km_post/12/initial
             self.event = "force"
             start_pos = end_pos + 1
             tokens = line[start_pos:].split()
