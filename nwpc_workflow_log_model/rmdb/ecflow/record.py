@@ -4,7 +4,7 @@ import logging
 from sqlalchemy import Column, String
 from nwpc_workflow_log_model.rmdb.base.model import Model
 from nwpc_workflow_log_model.rmdb.base.record import RecordBase
-from nwpc_workflow_log_model.log_record.ecflow_log_record import EcflowLogRecord
+from nwpc_workflow_log_model.log_record.ecflow import EcflowLogRecord
 
 logger = logging.getLogger()
 
