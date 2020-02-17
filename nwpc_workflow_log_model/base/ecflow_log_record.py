@@ -6,7 +6,7 @@ from loguru import logger
 from nwpc_workflow_log_model.base.log_record import LogRecord, LogType
 
 
-class CommandType(Enum):
+class EventType(Enum):
     Status = "status"
     Client = "client"
     Child = "child"
@@ -18,7 +18,7 @@ class EcflowLogRecord(LogRecord):
     def __init__(self):
         LogRecord.__init__(self)
 
-        self.command_type: CommandType = CommandType.Unknown
+        self.event_type: EventType = EventType.Unknown
 
     def parse(self, line: str):
         """
@@ -44,22 +44,22 @@ class EcflowLogRecord(LogRecord):
 
         start_pos = end_pos + 2
         if line[start_pos: start_pos + 1] == " ":
-            self.command_type = CommandType.Status
+            self.event_type = EventType.Status
             start_pos += 1
             self._parse_status_record(line[start_pos:])
         elif line[start_pos: start_pos + 2] == "--":
-            self.command_type = CommandType.Client
+            self.event_type = EventType.Client
             start_pos += 2
             self._parse_client_record(line[start_pos:])
         elif line[start_pos: start_pos + 4] == "chd:":
-            # child command
-            self.command_type = CommandType.Child
+            # child event
+            self.event_type = EventType.Child
             start_pos += 4
             self._parse_child_record(line[start_pos:])
         elif line[start_pos: start_pos + 4] == "svr:":
             # server
-            # print("[server command]", line)
-            self.command_type = CommandType.Server
+            # print("[server event]", line)
+            self.event_type = EventType.Server
         elif len(line[start_pos:].strip()) > 0:
             # NOTE: line[start_pos].strip() will be empty but I haven't found example line.
             if line[start_pos:].strip()[0].isupper():
@@ -107,13 +107,13 @@ class EcflowLogRecord(LogRecord):
             if status_line.strip()[0].isupper():
                 pass
             else:
-                # print("[ERROR] status record: command not found =>", self.log_record)
+                # print("[ERROR] status record: event not found =>", self.log_record)
                 pass
             return
-        command = status_line[start_pos:end_pos]
+        event = status_line[start_pos:end_pos]
 
-        if command in ("active", "queued", "complete", "aborted"):
-            self.command = command
+        if event in ("active", "queued", "complete", "aborted"):
+            self.event = event
             start_pos = end_pos + 2
             end_pos = status_line.find(" ", start_pos)
             if end_pos == -1:
@@ -124,30 +124,30 @@ class EcflowLogRecord(LogRecord):
                 #  try-no: 1 reason: trap
                 self.node_path = status_line[start_pos:end_pos]
                 self.additional_attrs["reason"] = status_line[end_pos + 1:]
-        elif command == "submitted":
+        elif event == "submitted":
             # LOG:[17:38:08 28.1.2020]  submitted: /grapes_geps_v1_2/12/members/pair_06/mem02/geps2tigge/geps2tigge_054 job_size:31866
-            self.command = command
+            self.event = event
             start_pos = end_pos + 2
             end_pos = status_line.find(" ", start_pos)
             self.node_path = status_line[start_pos:end_pos]
             start_pos = end_pos + 1
             end_pos = status_line.find(":", start_pos)
             self.additional_attrs["job_size"] = status_line[end_pos + 1:]
-        elif command in ("unknown",):
+        elif event in ("unknown",):
             # just ignore
             pass
-        elif command == "":
+        elif event == "":
             # MSG:[04:39:45 18.7.2019]  :nwp
             pass
-        elif command.strip()[0].isupper():
+        elif event.strip()[0].isupper():
             pass
-        elif command[0] == "[":
+        elif event[0] == "[":
             # WAR:[09:16:14 8.8.2018]  [ overloaded || --abort*2 ] (pid & password match) : chd:abort
             #  : /grapes_emer_v1_1/12/plot/plot_wind : already aborted : action(fob)
             pass
         else:
-            self.command = command
-            # print("[ERROR] status record: command not supported =>", self.log_record)
+            self.event = event
+            # print("[ERROR] status record: event not supported =>", self.log_record)
 
     def _parse_child_record(self, child_line: str):
         """
@@ -168,12 +168,12 @@ class EcflowLogRecord(LogRecord):
         start_pos = 0
         end_pos = child_line.find(" ", start_pos)
         if end_pos == -1:
-            # print("[ERROR] child record: command not found =>", self.log_record)
+            # print("[ERROR] child record: event not found =>", self.log_record)
             return
-        command = child_line[start_pos:end_pos]
-        self.command = command
+        event = child_line[start_pos:end_pos]
+        self.event = event
 
-        if command in ("init", "complete", "abort"):
+        if event in ("init", "complete", "abort"):
             start_pos = end_pos + 2
             end_pos = child_line.find(" ", start_pos)
             if end_pos == -1:
@@ -184,7 +184,7 @@ class EcflowLogRecord(LogRecord):
                 #  /3km_post/06/3km_togrib2/grib2WORK/030/after_data2grib2_030  trap
                 self.node_path = child_line[start_pos:end_pos]
                 self.additional_attrs["reason"] = child_line[end_pos + 1:]
-        elif command in ("meter", "label", "event"):
+        elif event in ("meter", "label", "event"):
             # MSG:[09:24:06 29.6.2018] chd:event transmissiondone
             #  /gmf_grapes_025L60_v2.2_post/00/tograph/base/015/AN_AEA/QFLXDIV_P700_AN_AEA_sep_015
             start_pos = end_pos + 1
@@ -197,7 +197,7 @@ class EcflowLogRecord(LogRecord):
                 # print("[ERROR] child record: parse error =>", self.log_record)
                 pass
         else:
-            logger.error("child record: command not supported =>", self.log_record)
+            logger.error("child record: event not supported =>", self.log_record)
 
     def _parse_client_record(self, line: str):
         """
@@ -220,13 +220,13 @@ class EcflowLogRecord(LogRecord):
         start_pos = 0
         end_pos = line.find(" ", start_pos)
         if end_pos == -1:
-            # print("[ERROR] client record: command not found =>", self.log_record)
+            # print("[ERROR] client record: event not found =>", self.log_record)
             return
-        command = line[start_pos:end_pos]
+        event = line[start_pos:end_pos]
 
-        if command == "requeue":
+        if event == "requeue":
             # MSG:[07:50:49 31.1.2020] --requeue force /grapes_reps_v3_2/00/control/model/fcst_monitor  :nwp_qu
-            self.command = command
+            self.event = event
             start_pos = end_pos + 1
             tokens = line[start_pos:].split()
             if len(tokens) == 3:
@@ -239,7 +239,7 @@ class EcflowLogRecord(LogRecord):
             else:
                 # print("[ERROR] client record: requeue parse error =>", self.log_record)
                 return
-        elif command in (
+        elif event in (
                 "alter",
                 "free-dep",
                 "kill",
@@ -250,7 +250,7 @@ class EcflowLogRecord(LogRecord):
                 "status",
         ):
             # MSG:[06:45:59 12.1.2020] --alter change meter fcstHours 360 /grapes_geps_v1_2/00/members/pair_15/mem01/model/fcst_monitor  :nwp
-            self.command = command
+            self.event = event
             start_pos = end_pos + 1
             tokens = line[start_pos:].split()
             user = tokens[-1]
@@ -258,8 +258,8 @@ class EcflowLogRecord(LogRecord):
             self.node_path = node_path
             self.additional_attrs["options"] = " ".join(tokens[:-2])
             self.additional_attrs["user"] = user
-        elif command.startswith("force="):
-            self.command = "force"
+        elif event.startswith("force="):
+            self.event = "force"
             start_pos = end_pos + 1
             tokens = line[start_pos:].split()
             node_path = tokens[-2]
@@ -267,43 +267,43 @@ class EcflowLogRecord(LogRecord):
             self.node_path = node_path
             self.additional_attrs["options"] = " ".join(tokens[:-2])
             self.additional_attrs["user"] = user
-        elif command.startswith("file="):
+        elif event.startswith("file="):
             # MSG:[06:54:07 13.1.2020] --file=/grapes_reps_v3_2/00/control/pre_data/gmf_get/gmf_get_000 script 10000  :operator
-            self.command = "file"
-            node_path = command[5:]
+            self.event = "file"
+            node_path = event[5:]
             self.node_path = node_path
             start_pos = end_pos + 1
             tokens = line[start_pos:].split()
             user = tokens[-1]
             self.additional_attrs["options"] = " ".join(tokens[:-1])
             self.additional_attrs["user"] = user
-        elif command.startswith("load="):
+        elif event.startswith("load="):
             # MSG:[03:14:32 19.1.2020] --load=gmf_grapes_gfs_post.def  :nwp_pd
-            self.command = "load"
-            node_path = command[5:]
+            self.event = "load"
+            node_path = event[5:]
             self.node_path = node_path
             start_pos = end_pos + 1
             self.additional_attrs = line[start_pos:]
-        elif command.startswith("begin="):
-            self.command = "begin"
-            node_path = command[6:]
+        elif event.startswith("begin="):
+            self.event = "begin"
+            node_path = event[6:]
             self.node_path = node_path
             start_pos = end_pos + 1
             self.additional_attrs = line[start_pos:]
-        elif command.startswith("replace="):
+        elif event.startswith("replace="):
             # MSG:[02:54:48 13.1.2020] --replace=/gmf_grapes_gfs_post gmf_grapes_gfs_post.def parent  :nwp_pd
-            self.command = "replace"
-            node_path = command[5:]
+            self.event = "replace"
+            node_path = event[5:]
             self.node_path = node_path
             start_pos = end_pos + 1
             self.additional_attrs = line[start_pos:]
-        elif command.startswith("order="):
-            self.command = "order"
-            node_path = command[6:]
+        elif event.startswith("order="):
+            self.event = "order"
+            node_path = event[6:]
             self.node_path = node_path
             start_pos = end_pos + 1
             self.additional_attrs = line[start_pos:]
-        elif command in (
+        elif event in (
                 "restart",
                 "suites",
                 "stats",
@@ -328,28 +328,28 @@ class EcflowLogRecord(LogRecord):
 
             # MSG:[11:40:17 9.1.2020] --ping :nwp
 
-            self.command = command
+            self.event = event
         elif (
-                command.startswith("sync_full=")
-                or command.startswith("news=")
-                or command.startswith("sync=")
-                or command.startswith("edit_script=")
-                or command.startswith("zombie_fail=")
-                or command.startswith("zombie_kill=")
-                or command.startswith("zombie_fob=")
-                or command.startswith("zombie_adopt=")
-                or command.startswith("zombie_remove=")
-                or command.startswith("log=")
-                or command.startswith("halt=")
-                or command.startswith("terminate=")
-                or command.startswith("order=")
-                or command.startswith("ch_register=")
-                or command.startswith("ch_drop=")
+                event.startswith("sync_full=")
+                or event.startswith("news=")
+                or event.startswith("sync=")
+                or event.startswith("edit_script=")
+                or event.startswith("zombie_fail=")
+                or event.startswith("zombie_kill=")
+                or event.startswith("zombie_fob=")
+                or event.startswith("zombie_adopt=")
+                or event.startswith("zombie_remove=")
+                or event.startswith("log=")
+                or event.startswith("halt=")
+                or event.startswith("terminate=")
+                or event.startswith("order=")
+                or event.startswith("ch_register=")
+                or event.startswith("ch_drop=")
         ):
-            self.command = command[: command.find("=")]
+            self.event = event[: event.find("=")]
         else:
-            self.command = command
-            # print("[ERROR] client record: command not supported =>", self.log_record)
+            self.event = event
+            # print("[ERROR] client record: event not supported =>", self.log_record)
 
 
 def convert_ecflow_log_type(log_type: str) -> LogType:

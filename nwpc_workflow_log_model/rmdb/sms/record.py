@@ -28,7 +28,7 @@ class SmsRecordBase(RecordBase):
             'log_type',
             'date',
             'time',
-            'command',
+            'event',
             'node_path',
             'additional_information',
             'log_record',

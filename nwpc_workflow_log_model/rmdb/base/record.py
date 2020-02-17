@@ -78,7 +78,7 @@ class RecordBase(object):
             ),
             Index(
                 "{owner}_{repo}_command_index".format(owner=cls.owner, repo=cls.repo),
-                "command",
+                "event",
             ),
             Index(
                 "{owner}_{repo}_fullname_index".format(owner=cls.owner, repo=cls.repo),

@@ -20,11 +20,11 @@ class EcflowRecordBase(RecordBase):
             'log_type',
             'date',
             'time',
-            'command',
+            'event',
             'node_path',
             'additional_information',
             'log_record',
-            'command_type',
+            'event_type',
         ]
         for an_attr in attrs:
             setattr(self, an_attr, getattr(record, an_attr))

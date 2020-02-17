@@ -19,7 +19,7 @@ class LogRecord(object):
         self.log_type: LogType = LogType.Unknown
         self.date: date or None = None
         self.time: time or None = None
-        self.command: str or None = None
+        self.event: str or None = None
         self.node_path: str or None = None
         self.additional_attrs: dict = {}
         self.log_record: str or None = None
