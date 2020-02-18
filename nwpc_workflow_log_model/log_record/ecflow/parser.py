@@ -2,15 +2,11 @@ from datetime import datetime
 
 from loguru import logger
 
-from nwpc_workflow_log_model.log_record.ecflow import (
-    EcflowLogRecord,
-    StatusLogRecord,
-    ClientLogRecord,
-    ChildLogRecord,
-    EventType,
-)
-
-from nwpc_workflow_log_model.log_record.ecflow.util import convert_ecflow_log_type
+from nwpc_workflow_log_model.log_record.ecflow.record import EcflowLogRecord
+from nwpc_workflow_log_model.log_record.ecflow.status_record import StatusLogRecord
+from nwpc_workflow_log_model.log_record.ecflow.client_record import ClientLogRecord
+from nwpc_workflow_log_model.log_record.ecflow.child_record import ChildLogRecord
+from nwpc_workflow_log_model.log_record.ecflow.util import (EventType, convert_ecflow_log_type)
 
 
 class EcflowLogParser(object):
