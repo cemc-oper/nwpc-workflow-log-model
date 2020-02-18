@@ -1,4 +1,4 @@
-from nwpc_workflow_log_model.log_record.ecflow.record import EcflowLogRecord, LogType
+from nwpc_workflow_log_model.log_record.ecflow.record import EcflowLogRecord, LogType, EventType
 from nwpc_workflow_model.node_status import NodeStatus
 
 
@@ -17,6 +17,7 @@ class StatusLogRecord(EcflowLogRecord):
             time=time,
             log_record=log_record
         )
+        self.event_type = EventType.Status
         self.status = NodeStatus.unknown
 
     def parse_record(self, status_line: str):
