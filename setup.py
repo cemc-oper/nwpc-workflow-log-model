@@ -1,4 +1,5 @@
-# coding: utf-8
+import re
+import io
 from setuptools import setup, find_packages
 import codecs
 from os import path
@@ -8,10 +9,13 @@ here = path.abspath(path.dirname(__file__))
 with codecs.open(path.join(here, "README.md"), encoding="utf-8") as f:
     long_description = f.read()
 
+with io.open("nwpc_workflow_log_model/__init__.py", "rt", encoding="utf8") as f:
+    version = re.search(r'__version__ = "(.*?)"', f.read()).group(1)
+
 setup(
     name="nwpc-workflow-log-model",
 
-    version="3.0.0-alpha",
+    version=version,
 
     description="A database model for workflow log in NWPC.",
     long_description=long_description,
