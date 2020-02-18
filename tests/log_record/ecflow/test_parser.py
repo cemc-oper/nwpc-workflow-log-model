@@ -1,4 +1,4 @@
-from nwpc_workflow_log_model.log_record.ecflow import EcflowLogParser
+from nwpc_workflow_log_model.log_record.ecflow import EcflowLogParser, EcflowLogRecord
 
 
 def test_ecflow_parser():
@@ -6,3 +6,4 @@ def test_ecflow_parser():
     parser = EcflowLogParser()
     record = parser.parse(line)
     assert record is not None
+    assert isinstance(record, EcflowLogRecord)
