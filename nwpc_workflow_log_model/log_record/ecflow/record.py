@@ -1,7 +1,5 @@
-from loguru import logger
-
-from nwpc_workflow_log_model.log_record.ecflow.util import EventType, convert_ecflow_log_type
 from nwpc_workflow_log_model.log_record.log_record import LogRecord, LogType
+from .util import EventType
 
 
 class EcflowLogRecord(LogRecord):

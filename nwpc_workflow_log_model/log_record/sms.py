@@ -1,7 +1,7 @@
 # coding: utf-8
 from datetime import datetime
 
-from nwpc_workflow_log_model.log_record.log_record import LogRecord
+from .log_record import LogRecord
 
 
 class SmsLogRecord(LogRecord):

@@ -1,4 +1,4 @@
-from nwpc_workflow_log_model.log_record.ecflow.record import EcflowLogRecord, LogType, EventType
+from .record import EcflowLogRecord, LogType, EventType
 
 
 class ServerLogRecord(EcflowLogRecord):
