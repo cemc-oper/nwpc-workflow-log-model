@@ -5,6 +5,8 @@ from nwpc_workflow_log_model.log_record.ecflow import (
 )
 from nwpc_workflow_model.node_status import NodeStatus
 
+from tests.log_record.ecflow._util import _check_attrs_value
+
 
 def test_submit():
     line = "LOG:[13:28:29 8.1.2020]  submitted: /gmf_grapes_gfs_post/06"
@@ -12,9 +14,14 @@ def test_submit():
     record = parser.parse(line)
     assert record is not None
     assert isinstance(record, StatusLogRecord)
-    assert record.event_type == EventType.Status
-    assert record.status == NodeStatus.submitted
-    assert record.node_path == "/gmf_grapes_gfs_post/06"
+
+    attrs = {
+        "event_type": EventType.Status,
+        "node_path": "/gmf_grapes_gfs_post/06",
+        "status": NodeStatus.submitted,
+        "event": "submitted",
+    }
+    _check_attrs_value(record, attrs)
 
 
 def test_submit_with_job_size():
@@ -23,7 +30,13 @@ def test_submit_with_job_size():
     record = parser.parse(line)
     assert record is not None
     assert isinstance(record, StatusLogRecord)
-    assert record.event_type == EventType.Status
-    assert record.status == NodeStatus.submitted
-    assert record.node_path == "/grapes_geps_v1_2/12/members/pair_06/mem02/geps2tigge/geps2tigge_054"
+
+    attrs = {
+        "event_type": EventType.Status,
+        "node_path": "/grapes_geps_v1_2/12/members/pair_06/mem02/geps2tigge/geps2tigge_054",
+        "status": NodeStatus.submitted,
+        "event": "submitted",
+    }
+    _check_attrs_value(record, attrs)
+
     assert record.additional_attrs["job_size"] == 31866

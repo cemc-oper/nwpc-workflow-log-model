@@ -3,6 +3,7 @@ from nwpc_workflow_log_model.log_record.ecflow import (
     EcflowLogParser,
     ChildLogRecord,
 )
+from tests.log_record.ecflow._util import _check_attrs_value
 
 
 def test_init():
@@ -11,10 +12,15 @@ def test_init():
     record = parser.parse(line)
     assert record is not None
     assert isinstance(record, ChildLogRecord)
-    assert record.event_type == EventType.Child
-    assert record.node_path == "/grapes_reps_v3_2/06/members/mem09/pre_data/gmf_get/gmf_get_030"
-    assert record.command == "init"
-    assert record.event == "init"
+
+    attrs = {
+        "event_type": EventType.Child,
+        "node_path": "/grapes_reps_v3_2/06/members/mem09/pre_data/gmf_get/gmf_get_030",
+        "command": "init",
+        "event": "init",
+    }
+
+    _check_attrs_value(record, attrs)
 
 
 def test_complete():
@@ -23,7 +29,12 @@ def test_complete():
     record = parser.parse(line)
     assert record is not None
     assert isinstance(record, ChildLogRecord)
-    assert record.event_type == EventType.Child
-    assert record.node_path == "/gmf_grapes_025L60_v2.2_post/18/typhoon/post/tc_post"
-    assert record.command == "complete"
-    assert record.event == "complete"
+
+    attrs = {
+        "event_type": EventType.Child,
+        "node_path": "/gmf_grapes_025L60_v2.2_post/18/typhoon/post/tc_post",
+        "command": "complete",
+        "event": "complete",
+    }
+
+    _check_attrs_value(record, attrs)
