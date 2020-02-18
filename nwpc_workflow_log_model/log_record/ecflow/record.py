@@ -14,5 +14,6 @@ class EcflowLogRecord(LogRecord):
         LogRecord.__init__(self)
         self.log_type = log_type
         self.log_record = log_record
-
+        self.date = date
+        self.time = time
         self.event_type: EventType = EventType.Unknown
