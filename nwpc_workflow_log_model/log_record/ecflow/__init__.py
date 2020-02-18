@@ -6,6 +6,7 @@ from nwpc_workflow_log_model.log_record.ecflow.util import EventType, convert_ec
 from nwpc_workflow_log_model.log_record.ecflow.record import EcflowLogRecord
 from nwpc_workflow_log_model.log_record.ecflow.status_record import StatusLogRecord
 from nwpc_workflow_log_model.log_record.ecflow.client_record import ClientLogRecord
+from nwpc_workflow_log_model.log_record.ecflow.child_record import ChildLogRecord
 
 
 class EcflowLogParser(object):
@@ -50,9 +51,14 @@ class EcflowLogParser(object):
             log_record.parse_record(line[start_pos:])
         elif line[start_pos: start_pos + 4] == "chd:":
             # child event
-            log_record.event_type = EventType.Child
+            log_record = ChildLogRecord(
+                log_type=log_type,
+                date=date_time.date(),
+                time=date_time.time(),
+                log_record=line,
+            )
             start_pos += 4
-            log_record._parse_child_record(line[start_pos:])
+            log_record.parse_record(line[start_pos:])
         elif line[start_pos: start_pos + 4] == "svr:":
             # server
             # print("[server event]", line)
