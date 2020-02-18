@@ -6,6 +6,7 @@ from nwpc_workflow_log_model.log_record.ecflow.record import EcflowLogRecord
 from nwpc_workflow_log_model.log_record.ecflow.status_record import StatusLogRecord
 from nwpc_workflow_log_model.log_record.ecflow.client_record import ClientLogRecord
 from nwpc_workflow_log_model.log_record.ecflow.child_record import ChildLogRecord
+from nwpc_workflow_log_model.log_record.ecflow.server_record import ServerLogRecord
 from nwpc_workflow_log_model.log_record.ecflow.util import (EventType, convert_ecflow_log_type)
 
 
@@ -61,8 +62,15 @@ class EcflowLogParser(object):
             log_record.parse_record(line[start_pos:])
         elif line[start_pos: start_pos + 4] == "svr:":
             # server
-            # print("[server event]", line)
-            log_record.event_type = EventType.Server
+            # MSG:[05:41:25 2.2.2020] svr:check_pt in 0 seconds
+            log_record = ServerLogRecord(
+                log_type=log_type,
+                date=date_time.date(),
+                time=date_time.time(),
+                log_record=line,
+            )
+            start_pos += 4
+            log_record.parse_record(line[start_pos:])
         elif len(line[start_pos:].strip()) > 0:
             # NOTE: line[start_pos].strip() will be empty but I haven't found example line.
             if line[start_pos:].strip()[0].isupper():

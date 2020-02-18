@@ -4,3 +4,4 @@ from nwpc_workflow_log_model.log_record.ecflow.status_record import StatusLogRec
 from nwpc_workflow_log_model.log_record.ecflow.client_record import ClientLogRecord
 from nwpc_workflow_log_model.log_record.ecflow.child_record import ChildLogRecord
 from nwpc_workflow_log_model.log_record.ecflow.parser import EcflowLogParser
+from nwpc_workflow_log_model.log_record.ecflow.server_record import ServerLogRecord
