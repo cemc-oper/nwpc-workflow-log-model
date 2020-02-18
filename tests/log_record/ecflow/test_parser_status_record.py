@@ -1,5 +1,8 @@
-from nwpc_workflow_log_model.log_record.ecflow import EcflowLogParser, EventType
-from nwpc_workflow_log_model.log_record.ecflow.status_record import StatusLogRecord
+from nwpc_workflow_log_model.log_record.ecflow import (
+    EventType,
+    EcflowLogParser,
+    StatusLogRecord,
+)
 from nwpc_workflow_model.node_status import NodeStatus
 
 

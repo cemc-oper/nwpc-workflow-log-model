@@ -1,5 +1,8 @@
-from nwpc_workflow_log_model.log_record.ecflow import EcflowLogParser, EventType
-from nwpc_workflow_log_model.log_record.ecflow.child_record import ChildLogRecord
+from nwpc_workflow_log_model.log_record.ecflow import (
+    EventType,
+    EcflowLogParser,
+    ChildLogRecord,
+)
 
 
 def test_init():

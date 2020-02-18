@@ -1,5 +1,8 @@
-from nwpc_workflow_log_model.log_record.ecflow import EcflowLogParser, EventType
-from nwpc_workflow_log_model.log_record.ecflow.client_record import ClientLogRecord
+from nwpc_workflow_log_model.log_record.ecflow import (
+    EventType,
+    EcflowLogParser,
+    ClientLogRecord,
+)
 
 
 def test_kill():
