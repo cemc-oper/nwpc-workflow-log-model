@@ -1,4 +1,4 @@
-from nwpc_workflow_log_model.log_record.log_record import LogRecord, LogType
+from ..log_record import LogRecord, LogType
 from .util import EventType
 
 
@@ -15,3 +15,6 @@ class EcflowLogRecord(LogRecord):
         self.date = date
         self.time = time
         self.event_type: EventType = EventType.Unknown
+
+    def parse(self, line: str):
+        raise NotImplemented("Please use EcflowLogParser to parse logs.")
