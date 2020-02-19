@@ -44,6 +44,7 @@ setup(
         "loguru",
         "mongoengine",
         "sqlalchemy",
+        "transitions"
     ],
 
     extras_require={
