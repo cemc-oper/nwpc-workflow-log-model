@@ -1,14 +1,17 @@
+import datetime
+
 from .record import EcflowLogRecord, LogType, EventType
+
 from nwpc_workflow_model.node_status import NodeStatus
 
 
 class StatusLogRecord(EcflowLogRecord):
     def __init__(
             self,
-            log_type=LogType.Unknown,
-            date=None,
-            time=None,
-            log_record=None
+            log_type: LogType = LogType.Unknown,
+            date: datetime.date = None,
+            time: datetime.time = None,
+            log_record: str = None,
     ):
         EcflowLogRecord.__init__(
             self,
@@ -17,8 +20,8 @@ class StatusLogRecord(EcflowLogRecord):
             time=time,
             log_record=log_record
         )
-        self.event_type = EventType.Status
-        self.status = NodeStatus.unknown
+        self.event_type: EventType = EventType.Status
+        self.status: NodeStatus = NodeStatus.unknown
 
     def parse_record(self, status_line: str):
         """
@@ -33,10 +36,9 @@ class StatusLogRecord(EcflowLogRecord):
         Parameters
         ----------
         status_line: str
-
-        Returns
-        -------
-
+            subset of log record line without log type and datetime, such as:
+                complete: /grapes_reps_v3_2/06/control/pre_data/psi
+                submitted: /grapes_geps_v1_2/12/members/pair_06/mem02/geps2tigge/geps2tigge_054 job_size:31866
         """
         start_pos = 0
         end_pos = status_line.find(":", start_pos)
