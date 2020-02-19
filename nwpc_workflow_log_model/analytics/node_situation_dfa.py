@@ -21,6 +21,9 @@ class NodeSituationDFA(object):
 
         self._initial_transitions()
 
+    def trigger(self, name: str):
+        self.node_situation.trigger(name)
+
     def _initial_transitions(self):
         self.machine.add_transition(
             trigger=NodeStatus.queued.value,

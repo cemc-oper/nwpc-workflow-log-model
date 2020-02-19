@@ -6,8 +6,8 @@ from nwpc_workflow_log_model.analytics.node_situation_dfa import (
 
 def test_node_situation_dfa():
     dfa = NodeSituationDFA(name="test")
-    dfa.node_situation.trigger(NodeStatus.queued.value)
+    dfa.trigger(NodeStatus.queued.value)
     assert dfa.node_situation.state == SituationType.CurrentQueue.value
 
-    dfa.node_situation.trigger(NodeStatus.submitted.value)
+    dfa.trigger(NodeStatus.submitted.value)
     assert dfa.node_situation.state == SituationType.Submit.value
