@@ -4,7 +4,7 @@ from .node_situation import (
 )
 from nwpc_workflow_model.node_status import NodeStatus
 
-from transitions import Machine
+from transitions.extensions.diagrams import GraphMachine as Machine
 
 
 class NodeSituationDFA(object):
