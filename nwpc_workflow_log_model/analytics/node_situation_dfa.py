@@ -32,11 +32,14 @@ class NodeSituationDFA(object):
 
     def _initial_transitions_for_init(self):
         source = SituationType.Initial
+        # queue enters CurrentQueue
         self.machine.add_transition(
             trigger=NodeStatus.queued.value,
             source=source,
             dest=SituationType.CurrentQueue,
         )
+
+        # complete is ignore.
         self.machine.add_transition(
             trigger=NodeStatus.complete.value,
             source=source,
@@ -51,36 +54,66 @@ class NodeSituationDFA(object):
             dest=SituationType.Submit,
         )
         self.machine.add_transition(
+            trigger=NodeStatus.active.value,
+            source=source,
+            dest=SituationType.Active,
+        )
+
+        # aborted enters Error
+        self.machine.add_transition(
             trigger=NodeStatus.aborted.value,
             source=source,
             dest=SituationType.Error,
         )
-        self.machine.add_transition(
-            trigger=NodeStatus.active.value,
-            source=source,
-            dest=SituationType.Active,
-        )
-        self.machine.add_transition(
-            trigger=NodeStatus.complete.value,
-            source=source,
-            dest=SituationType.Unknown,
-        )
-        self.machine.add_transition(
-            trigger=NodeStatus.queued.value,
-            source=source,
-            dest=SituationType.Unknown,
-        )
+
+        # complete and queued enter Unknown
+        for s in (NodeStatus.complete, NodeStatus.queued):
+            self.machine.add_transition(
+                trigger=s.value,
+                source=source,
+                dest=SituationType.Unknown,
+            )
 
     def _initial_transitions_for_submit(self):
+        source = SituationType.Submit
+
         self.machine.add_transition(
             trigger=NodeStatus.active.value,
-            source=SituationType.Submit,
+            source=source,
             dest=SituationType.Active,
         )
 
+        self.machine.add_transition(
+            trigger=NodeStatus.aborted.value,
+            source=source,
+            dest=SituationType.Error,
+        )
+
+        for s in (NodeStatus.complete, NodeStatus.queued, NodeStatus.submitted):
+            self.machine.add_transition(
+                trigger=s.value,
+                source=source,
+                dest=SituationType.Unknown,
+            )
+
     def _initial_transitions_for_active(self):
+        source = SituationType.Active
+
         self.machine.add_transition(
             trigger=NodeStatus.complete.value,
-            source=SituationType.Active,
+            source=source,
             dest=SituationType.Complete,
         )
+
+        self.machine.add_transition(
+            trigger=NodeStatus.aborted.value,
+            source=source,
+            dest=SituationType.Error,
+        )
+
+        for s in (NodeStatus.submitted, NodeStatus.queued, NodeStatus.active):
+            self.machine.add_transition(
+                trigger=s.value,
+                source=source,
+                dest=SituationType.Unknown,
+            )
