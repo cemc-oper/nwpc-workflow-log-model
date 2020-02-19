@@ -11,3 +11,9 @@ def test_node_situation_dfa():
 
     dfa.trigger(NodeStatus.submitted.value)
     assert dfa.node_situation.state == SituationType.Submit.value
+
+    dfa.trigger(NodeStatus.active.value)
+    assert dfa.node_situation.state == SituationType.Active.value
+
+    dfa.trigger(NodeStatus.complete.value)
+    assert dfa.node_situation.state == SituationType.Complete.value
