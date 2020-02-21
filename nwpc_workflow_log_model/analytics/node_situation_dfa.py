@@ -43,7 +43,7 @@ class NodeSituationDFA(object):
         self.machine.add_transition(
             trigger=NodeStatus.complete.value,
             source=source,
-            dest=source,
+            dest="=",
         )
 
     def _initial_transitions_for_current_queue(self):
