@@ -29,6 +29,7 @@ class NodeSituationDFA(object):
         self._initial_transitions_for_current_queue()
         self._initial_transitions_for_submit()
         self._initial_transitions_for_active()
+        self._initial_transitions_for_unknown()
 
     def _initial_transitions_for_init(self):
         source = SituationType.Initial
@@ -116,4 +117,19 @@ class NodeSituationDFA(object):
                 trigger=s.value,
                 source=source,
                 dest=SituationType.Unknown,
+            )
+
+    def _initial_transitions_for_unknown(self):
+        source = SituationType.Unknown
+        for t in (e.name for e in [
+            NodeStatus.queued,
+            NodeStatus.submitted,
+            NodeStatus.active,
+            NodeStatus.complete,
+            NodeStatus.aborted
+        ]):
+            self.machine.add_transition(
+                trigger=t,
+                source=source,
+                dest=source,
             )

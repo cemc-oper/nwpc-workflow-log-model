@@ -27,3 +27,25 @@ def test_node_situation_dfa_initial():
 
     dfa.trigger(NodeStatus.queued.value)
     assert dfa.node_situation.state is SituationType.CurrentQueue
+
+
+def test_node_situation_dfa_unknown():
+    dfa = NodeSituationDFA(name="test")
+    dfa.node_situation.state = SituationType.Unknown
+
+    assert dfa.node_situation.state is SituationType.Unknown
+
+    dfa.trigger(NodeStatus.complete.value)
+    assert dfa.node_situation.state is SituationType.Unknown
+
+    dfa.trigger(NodeStatus.queued.value)
+    assert dfa.node_situation.state is SituationType.Unknown
+
+    dfa.trigger(NodeStatus.aborted.value)
+    assert dfa.node_situation.state is SituationType.Unknown
+
+    dfa.trigger(NodeStatus.submitted.value)
+    assert dfa.node_situation.state is SituationType.Unknown
+
+    dfa.trigger(NodeStatus.active.value)
+    assert dfa.node_situation.state is SituationType.Unknown
