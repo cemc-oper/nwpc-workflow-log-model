@@ -8,7 +8,7 @@ from transitions.extensions.diagrams import GraphMachine as Machine
 
 
 class NodeSituationDFA(object):
-    states = [e.name for e in SituationType]
+    states = [e for e in SituationType]
 
     def __init__(self, name):
         self.name = name
