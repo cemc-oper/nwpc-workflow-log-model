@@ -7,13 +7,13 @@ from nwpc_workflow_log_model.analytics.node_situation_dfa import (
 def test_node_situation_dfa():
     dfa = NodeSituationDFA(name="test")
     dfa.trigger(NodeStatus.queued.value)
-    assert dfa.node_situation.state == SituationType.CurrentQueue
+    assert dfa.node_situation.state is SituationType.CurrentQueue
 
     dfa.trigger(NodeStatus.submitted.value)
-    assert dfa.node_situation.state == SituationType.Submit
+    assert dfa.node_situation.state is SituationType.Submit
 
     dfa.trigger(NodeStatus.active.value)
-    assert dfa.node_situation.state == SituationType.Active
+    assert dfa.node_situation.state is SituationType.Active
 
     dfa.trigger(NodeStatus.complete.value)
-    assert dfa.node_situation.state == SituationType.Complete
+    assert dfa.node_situation.state is SituationType.Complete
