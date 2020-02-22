@@ -1,7 +1,7 @@
 import datetime
 
 from .record import EcflowLogRecord, LogType, EventType
-from nwpc_workflow_log_model.analytics.node_status_change_record import NodeStatusChangeRecord
+from nwpc_workflow_log_model.analytics.node_status_change_data import NodeStatusChangeData
 
 from nwpc_workflow_model.node_status import NodeStatus
 
@@ -97,7 +97,7 @@ class StatusLogRecord(EcflowLogRecord):
             # print("[ERROR] status record: event not supported =>", self.log_record)
 
 
-@NodeStatusChangeRecord.register
+@NodeStatusChangeData.register
 class StatusChangeEntry(object):
     def __init__(self, record: StatusLogRecord):
         self._record = record
