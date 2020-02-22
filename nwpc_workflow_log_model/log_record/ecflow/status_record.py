@@ -1,10 +1,12 @@
 import datetime
 
 from .record import EcflowLogRecord, LogType, EventType
+from nwpc_workflow_log_model.analytics.node_status_change_record import NodeStatusChangeRecord
 
 from nwpc_workflow_model.node_status import NodeStatus
 
 
+@NodeStatusChangeRecord.register
 class StatusLogRecord(EcflowLogRecord):
     def __init__(
             self,
@@ -22,6 +24,10 @@ class StatusLogRecord(EcflowLogRecord):
         )
         self.event_type: EventType = EventType.Status
         self.status: NodeStatus = NodeStatus.unknown
+
+    @property
+    def date_time(self) -> datetime.datetime:
+        return datetime.datetime.combine(self.date, self.time)
 
     def parse_record(self, status_line: str):
         """
