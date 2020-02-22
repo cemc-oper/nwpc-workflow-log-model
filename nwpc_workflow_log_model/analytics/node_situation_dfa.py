@@ -14,15 +14,12 @@ class NodeSituationDFA(object):
         self.name = name
         self.node_situation = NodeSituation()
         self.machine = Machine(
-            model=self.node_situation,
+            model=self,
             states=NodeSituationDFA.states,
             initial=SituationType.Initial,
         )
 
         self._initial_transitions()
-
-    def trigger(self, name: str):
-        self.node_situation.trigger(name)
 
     def _initial_transitions(self):
         self._initial_transitions_for_init()
