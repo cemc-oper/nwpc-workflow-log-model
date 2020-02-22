@@ -6,7 +6,6 @@ from nwpc_workflow_log_model.analytics.node_status_change_record import NodeStat
 from nwpc_workflow_model.node_status import NodeStatus
 
 
-@NodeStatusChangeRecord.register
 class StatusLogRecord(EcflowLogRecord):
     def __init__(
             self,
@@ -24,10 +23,6 @@ class StatusLogRecord(EcflowLogRecord):
         )
         self.event_type: EventType = EventType.Status
         self.status: NodeStatus = NodeStatus.unknown
-
-    @property
-    def date_time(self) -> datetime.datetime:
-        return datetime.datetime.combine(self.date, self.time)
 
     def parse_record(self, status_line: str):
         """
@@ -100,3 +95,17 @@ class StatusLogRecord(EcflowLogRecord):
         else:
             self.event = event
             # print("[ERROR] status record: event not supported =>", self.log_record)
+
+
+@NodeStatusChangeRecord.register
+class StatusChangeEntry(object):
+    def __init__(self, record: StatusLogRecord):
+        self._record = record
+
+    @property
+    def status(self) -> NodeStatus:
+        return self._record.status
+
+    @property
+    def date_time(self) -> datetime.datetime:
+        return datetime.datetime.combine(self._record.date, self._record.time)
