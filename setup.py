@@ -44,7 +44,9 @@ setup(
         "loguru",
         "mongoengine",
         "sqlalchemy",
-        "transitions"
+        "transitions",
+        "pygraphviz",
+        "nwpc-workflow-model>=0.5,<0.6"
     ],
 
     extras_require={
