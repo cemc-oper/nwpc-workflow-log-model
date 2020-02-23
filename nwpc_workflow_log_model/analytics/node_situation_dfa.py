@@ -1,7 +1,9 @@
 from .node_situation import (
     NodeSituation,
     SituationType,
+    TimePoint,
 )
+from .node_status_change_data import NodeStatusChangeData
 from nwpc_workflow_model.node_status import NodeStatus
 
 from transitions.extensions.diagrams import GraphMachine as Machine
@@ -21,6 +23,16 @@ class NodeSituationDFA(object):
 
         self._initial_transitions()
 
+    def add_node_data(self, node_data: NodeStatusChangeData = None):
+        if node_data is None:
+            return
+        self.node_situation.time_points.append(
+            TimePoint(
+                status=node_data.status,
+                time=node_data.date_time,
+            )
+        )
+
     def _initial_transitions(self):
         self._initial_transitions_for_init()
         self._initial_transitions_for_current_queue()
@@ -35,6 +47,7 @@ class NodeSituationDFA(object):
             trigger=NodeStatus.queued.value,
             source=source,
             dest=SituationType.CurrentQueue,
+            before="add_node_data",
         )
 
         # complete is ignore.
@@ -50,11 +63,13 @@ class NodeSituationDFA(object):
             trigger=NodeStatus.submitted.value,
             source=source,
             dest=SituationType.Submit,
+            before="add_node_data",
         )
         self.machine.add_transition(
             trigger=NodeStatus.active.value,
             source=source,
             dest=SituationType.Active,
+            before="add_node_data",
         )
 
         # aborted enters Error
@@ -62,6 +77,7 @@ class NodeSituationDFA(object):
             trigger=NodeStatus.aborted.value,
             source=source,
             dest=SituationType.Error,
+            before="add_node_data",
         )
 
         # complete and queued enter Unknown
@@ -79,12 +95,14 @@ class NodeSituationDFA(object):
             trigger=NodeStatus.active.value,
             source=source,
             dest=SituationType.Active,
+            before="add_node_data",
         )
 
         self.machine.add_transition(
             trigger=NodeStatus.aborted.value,
             source=source,
             dest=SituationType.Error,
+            before="add_node_data",
         )
 
         for s in (NodeStatus.complete, NodeStatus.queued, NodeStatus.submitted):
@@ -101,12 +119,14 @@ class NodeSituationDFA(object):
             trigger=NodeStatus.complete.value,
             source=source,
             dest=SituationType.Complete,
+            before="add_node_data",
         )
 
         self.machine.add_transition(
             trigger=NodeStatus.aborted.value,
             source=source,
             dest=SituationType.Error,
+            before="add_node_data",
         )
 
         for s in (NodeStatus.submitted, NodeStatus.queued, NodeStatus.active):

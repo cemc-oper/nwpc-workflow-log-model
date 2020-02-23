@@ -30,6 +30,9 @@ class TimePoint(object):
         self.status = status
         self.time = time
 
+    def __eq__(self, other):
+        return self.status == other.status and self.time == self.time
+
 
 class TimePeriod(object):
     def __init__(
