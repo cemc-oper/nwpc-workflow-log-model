@@ -31,7 +31,7 @@ def test_node_situation_dfa_initial():
 
 def test_node_situation_dfa_unknown():
     dfa = NodeSituationDFA(name="test")
-    dfa.state = SituationType.Unknown
+    dfa.machine.set_state(SituationType.Unknown)
 
     assert dfa.state is SituationType.Unknown
 
