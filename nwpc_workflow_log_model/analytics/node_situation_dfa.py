@@ -2,6 +2,8 @@ from .node_situation import (
     NodeSituation,
     SituationType,
     TimePoint,
+    TimePeriodType,
+    TimePeriod,
 )
 from .node_status_change_data import NodeStatusChangeData
 from nwpc_workflow_model.node_status import NodeStatus
@@ -21,6 +23,13 @@ class NodeSituationDFA(object):
             initial=SituationType.Initial,
         )
 
+        self._current_cycle = {
+            NodeStatus.submitted: None,
+            NodeStatus.active: None,
+            NodeStatus.complete: None,
+            NodeStatus.aborted: None,
+        }
+
         self._initial_transitions()
 
     def add_node_data(self, node_data: NodeStatusChangeData = None):
@@ -32,6 +41,55 @@ class NodeSituationDFA(object):
                 time=node_data.date_time,
             )
         )
+
+    def enter_new_cycle(self, node_data: NodeStatusChangeData = None):
+        if node_data is None:
+            return
+        self._current_cycle = {
+            NodeStatus.submitted: None,
+            NodeStatus.active: None,
+            NodeStatus.complete: None,
+            NodeStatus.aborted: None,
+        }
+
+    def set_cycle_time_point(self, node_data: NodeStatusChangeData = None):
+        if node_data is None:
+            return
+        self._current_cycle[node_data.status] = node_data.date_time
+
+    def calculate_time_period(self, **kwargs):
+        in_active = TimePeriod(
+            period_type=TimePeriodType.InActive,
+            start_time=self._current_cycle[NodeStatus.active],
+            end_time=self._current_cycle[NodeStatus.complete],
+        )
+        submitted_time = self._current_cycle[NodeStatus.submitted]
+        if submitted_time is None:
+            in_all = TimePeriod(
+                period_type=TimePeriodType.InAll,
+                start_time=self._current_cycle[NodeStatus.active],
+                end_time=self._current_cycle[NodeStatus.complete],
+            )
+            self.node_situation.time_periods.extend([
+                in_all,
+                in_active,
+            ])
+        else:
+            in_all = TimePeriod(
+                period_type=TimePeriodType.InAll,
+                start_time=self._current_cycle[NodeStatus.submitted],
+                end_time=self._current_cycle[NodeStatus.complete]
+            )
+            in_submitted = TimePeriod(
+                period_type=TimePeriodType.InSubmitted,
+                start_time=self._current_cycle[NodeStatus.submitted],
+                end_time=self._current_cycle[NodeStatus.active]
+            )
+            self.node_situation.time_periods.extend([
+                in_all,
+                in_submitted,
+                in_active,
+            ])
 
     def _initial_transitions(self):
         self._initial_transitions_for_init()
@@ -48,6 +106,7 @@ class NodeSituationDFA(object):
             source=source,
             dest=SituationType.CurrentQueue,
             before="add_node_data",
+            after="enter_new_cycle",
         )
 
         # complete is ignore.
@@ -64,12 +123,15 @@ class NodeSituationDFA(object):
             source=source,
             dest=SituationType.Submit,
             before="add_node_data",
+            after="set_cycle_time_point",
         )
+
         self.machine.add_transition(
             trigger=NodeStatus.active.value,
             source=source,
             dest=SituationType.Active,
             before="add_node_data",
+            after="set_cycle_time_point",
         )
 
         # aborted enters Error
@@ -78,6 +140,7 @@ class NodeSituationDFA(object):
             source=source,
             dest=SituationType.Error,
             before="add_node_data",
+            after="set_cycle_time_point",
         )
 
         # complete and queued enter Unknown
@@ -96,6 +159,7 @@ class NodeSituationDFA(object):
             source=source,
             dest=SituationType.Active,
             before="add_node_data",
+            after="set_cycle_time_point",
         )
 
         self.machine.add_transition(
@@ -103,6 +167,7 @@ class NodeSituationDFA(object):
             source=source,
             dest=SituationType.Error,
             before="add_node_data",
+            after="set_cycle_time_point",
         )
 
         for s in (NodeStatus.complete, NodeStatus.queued, NodeStatus.submitted):
@@ -120,6 +185,10 @@ class NodeSituationDFA(object):
             source=source,
             dest=SituationType.Complete,
             before="add_node_data",
+            after=[
+                "set_cycle_time_point",
+                "calculate_time_period",
+            ],
         )
 
         self.machine.add_transition(
@@ -127,6 +196,7 @@ class NodeSituationDFA(object):
             source=source,
             dest=SituationType.Error,
             before="add_node_data",
+            after="set_cycle_time_point",
         )
 
         for s in (NodeStatus.submitted, NodeStatus.queued, NodeStatus.active):
