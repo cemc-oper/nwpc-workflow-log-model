@@ -1,10 +1,10 @@
-from nwpc_workflow_log_model.analytics.node_situation_dfa import (
-    NodeSituationDFA, NodeStatus, SituationType
+from nwpc_workflow_log_model.analytics.node_status_change_dfa import (
+    NodeStatusChangeDFA, NodeStatus, SituationType
 )
 
 
 def test_node_situation_dfa():
-    dfa = NodeSituationDFA(name="test")
+    dfa = NodeStatusChangeDFA(name="test")
     dfa.trigger(NodeStatus.queued.value)
     assert dfa.state is SituationType.CurrentQueue
     assert dfa.node_situation.situation is SituationType.CurrentQueue
@@ -23,7 +23,7 @@ def test_node_situation_dfa():
 
 
 def test_node_situation_dfa_initial():
-    dfa = NodeSituationDFA(name="test")
+    dfa = NodeStatusChangeDFA(name="test")
     assert dfa.state is SituationType.Initial
 
     dfa.trigger(NodeStatus.complete.value)
@@ -34,7 +34,7 @@ def test_node_situation_dfa_initial():
 
 
 def test_node_situation_dfa_unknown():
-    dfa = NodeSituationDFA(name="test")
+    dfa = NodeStatusChangeDFA(name="test")
     dfa.machine.set_state(SituationType.Unknown)
 
     assert dfa.state is SituationType.Unknown

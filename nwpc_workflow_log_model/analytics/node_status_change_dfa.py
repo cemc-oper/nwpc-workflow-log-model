@@ -11,7 +11,7 @@ from nwpc_workflow_model.node_status import NodeStatus
 from transitions.extensions.diagrams import GraphMachine as Machine
 
 
-class NodeSituationDFA(object):
+class NodeStatusChangeDFA(object):
     states = [e for e in SituationType]
 
     def __init__(self, name):
@@ -19,7 +19,7 @@ class NodeSituationDFA(object):
         self.node_situation = NodeSituation()
         self.machine = Machine(
             model=self,
-            states=NodeSituationDFA.states,
+            states=NodeStatusChangeDFA.states,
             initial=SituationType.Initial,
             after_state_change=self.change_node_situation_type,
         )
