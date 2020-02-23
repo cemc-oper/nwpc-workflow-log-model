@@ -6,6 +6,9 @@ from nwpc_workflow_model.node_status import NodeStatus
 
 
 class SituationType(Enum):
+    """
+    节点运行状态
+    """
     Initial = "initial"
     CurrentQueue = "current_queue"
     Submit = "submit"
@@ -47,6 +50,9 @@ class TimePeriod(object):
 
 
 class NodeSituation(object):
+    """
+    节点运行状态，根据节点状态序列分析得到
+    """
     def __init__(
             self,
             situation: SituationType = SituationType.Initial,
