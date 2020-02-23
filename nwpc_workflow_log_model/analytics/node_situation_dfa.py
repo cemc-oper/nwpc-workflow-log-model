@@ -21,7 +21,7 @@ class NodeSituationDFA(object):
             model=self,
             states=NodeSituationDFA.states,
             initial=SituationType.Initial,
-            after_state_change="change_node_situation_type",
+            after_state_change=self.change_node_situation_type,
         )
 
         self._current_cycle = {
@@ -109,8 +109,8 @@ class NodeSituationDFA(object):
             trigger=NodeStatus.queued.value,
             source=source,
             dest=SituationType.CurrentQueue,
-            before="add_node_data",
-            after="enter_new_cycle",
+            before=self.add_node_data,
+            after=self.enter_new_cycle,
         )
 
         # complete is ignore.
@@ -126,16 +126,16 @@ class NodeSituationDFA(object):
             trigger=NodeStatus.submitted.value,
             source=source,
             dest=SituationType.Submit,
-            before="add_node_data",
-            after="set_cycle_time_point",
+            before=self.add_node_data,
+            after=self.set_cycle_time_point,
         )
 
         self.machine.add_transition(
             trigger=NodeStatus.active.value,
             source=source,
             dest=SituationType.Active,
-            before="add_node_data",
-            after="set_cycle_time_point",
+            before=self.add_node_data,
+            after=self.set_cycle_time_point,
         )
 
         # aborted enters Error
@@ -143,8 +143,8 @@ class NodeSituationDFA(object):
             trigger=NodeStatus.aborted.value,
             source=source,
             dest=SituationType.Error,
-            before="add_node_data",
-            after="set_cycle_time_point",
+            before=self.add_node_data,
+            after=self.set_cycle_time_point,
         )
 
         # complete and queued enter Unknown
@@ -162,16 +162,16 @@ class NodeSituationDFA(object):
             trigger=NodeStatus.active.value,
             source=source,
             dest=SituationType.Active,
-            before="add_node_data",
-            after="set_cycle_time_point",
+            before=self.add_node_data,
+            after=self.set_cycle_time_point,
         )
 
         self.machine.add_transition(
             trigger=NodeStatus.aborted.value,
             source=source,
             dest=SituationType.Error,
-            before="add_node_data",
-            after="set_cycle_time_point",
+            before=self.add_node_data,
+            after=self.set_cycle_time_point,
         )
 
         for s in (NodeStatus.complete, NodeStatus.queued, NodeStatus.submitted):
@@ -188,10 +188,10 @@ class NodeSituationDFA(object):
             trigger=NodeStatus.complete.value,
             source=source,
             dest=SituationType.Complete,
-            before="add_node_data",
+            before=self.add_node_data,
             after=[
-                "set_cycle_time_point",
-                "calculate_time_period",
+                self.set_cycle_time_point,
+                self.calculate_time_period,
             ],
         )
 
@@ -199,8 +199,8 @@ class NodeSituationDFA(object):
             trigger=NodeStatus.aborted.value,
             source=source,
             dest=SituationType.Error,
-            before="add_node_data",
-            after="set_cycle_time_point",
+            before=self.add_node_data,
+            after=self.set_cycle_time_point,
         )
 
         for s in (NodeStatus.submitted, NodeStatus.queued, NodeStatus.active):
