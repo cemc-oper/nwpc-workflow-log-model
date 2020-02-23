@@ -7,15 +7,19 @@ def test_node_situation_dfa():
     dfa = NodeSituationDFA(name="test")
     dfa.trigger(NodeStatus.queued.value)
     assert dfa.state is SituationType.CurrentQueue
+    assert dfa.node_situation.situation is SituationType.CurrentQueue
 
     dfa.trigger(NodeStatus.submitted.value)
     assert dfa.state is SituationType.Submit
+    assert dfa.node_situation.situation is SituationType.Submit
 
     dfa.trigger(NodeStatus.active.value)
     assert dfa.state is SituationType.Active
+    assert dfa.node_situation.situation is SituationType.Active
 
     dfa.trigger(NodeStatus.complete.value)
     assert dfa.state is SituationType.Complete
+    assert dfa.node_situation.situation is SituationType.Complete
 
 
 def test_node_situation_dfa_initial():

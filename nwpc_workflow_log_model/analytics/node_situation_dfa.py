@@ -21,6 +21,7 @@ class NodeSituationDFA(object):
             model=self,
             states=NodeSituationDFA.states,
             initial=SituationType.Initial,
+            after_state_change="change_node_situation_type",
         )
 
         self._current_cycle = {
@@ -90,6 +91,9 @@ class NodeSituationDFA(object):
                 in_submitted,
                 in_active,
             ])
+
+    def change_node_situation_type(self, **kwargs):
+        self.node_situation.situation = self.state
 
     def _initial_transitions(self):
         self._initial_transitions_for_init()
