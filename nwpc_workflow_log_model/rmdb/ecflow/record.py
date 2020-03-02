@@ -4,7 +4,7 @@ import logging
 from sqlalchemy import Column, String
 from nwpc_workflow_log_model.rmdb.base.model import Model
 from nwpc_workflow_log_model.rmdb.base.record import RecordBase
-from nwpc_workflow_log_model.log_record.ecflow import EcflowLogRecord
+from nwpc_workflow_log_model.log_record.ecflow import EcflowLogRecord, EcflowLogParser
 
 logger = logging.getLogger()
 
@@ -13,8 +13,8 @@ class EcflowRecordBase(RecordBase):
     command_type = Column(String(10))
 
     def parse(self, line):
-        record = EcflowLogRecord()
-        record.parse(line)
+        parser = EcflowLogParser()
+        record = parser.parse(line)
 
         attrs = [
             'log_type',
@@ -22,7 +22,7 @@ class EcflowRecordBase(RecordBase):
             'time',
             'event',
             'node_path',
-            'additional_information',
+            # 'additional_information', # TODO: add information.
             'log_record',
             'event_type',
         ]
