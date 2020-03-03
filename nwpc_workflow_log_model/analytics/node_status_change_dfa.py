@@ -116,12 +116,18 @@ class NodeStatusChangeDFA(object):
             after=self.enter_new_cycle,
         )
 
-        # complete is ignore.
-        self.machine.add_transition(
-            trigger=NodeStatus.complete.value,
-            source=source,
-            dest="=",
-        )
+        # all else is ignore.
+        for t in (e.value for e in [
+            NodeStatus.submitted,
+            NodeStatus.active,
+            NodeStatus.complete,
+            NodeStatus.aborted
+        ]):
+            self.machine.add_transition(
+                trigger=t,
+                source=source,
+                dest="=",
+            )
 
     def _initial_transitions_for_current_queue(self):
         source = SituationType.CurrentQueue
