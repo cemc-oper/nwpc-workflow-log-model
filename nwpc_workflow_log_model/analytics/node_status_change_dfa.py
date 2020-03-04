@@ -106,6 +106,8 @@ class NodeStatusChangeDFA(object):
         self._initial_transitions_for_unknown()
 
     def _initial_transitions_for_init(self):
+        """Find NodeStatus.queued for Initial state and ignore others.
+        """
         source = SituationType.Initial
         # queue enters CurrentQueue
         self.machine.add_transition(
