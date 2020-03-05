@@ -13,7 +13,8 @@ from transitions.extensions.diagrams import GraphMachine as Machine
 
 class NodeStatusChangeDFA(object):
     """
-    根据 NodeStatusChangeData 数据分析Task节点的运行状态，基于有限状态机实现。
+    根据 NodeStatusChangeData 数据分析 Task 节点的运行状态。
+    基于有限状态机（DFA）实现。
     """
     states = [e for e in SituationType]
 
