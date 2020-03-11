@@ -119,6 +119,17 @@ class NodeStatusChangeDFA(object):
             after=self.enter_new_cycle,
         )
 
+        # submitted enters Submit directly
+        #   有些系统没有显示指定housekeep任务时间，所有时次结束直接进入下一次循环，
+        #   导致第二天的日志中没有queued条目。
+        self.machine.add_transition(
+            trigger=NodeStatus.submitted.value,
+            source=source,
+            dest=SituationType.Submit,
+            before=self.add_node_data,
+            after=[self.enter_new_cycle, self.set_cycle_time_point],
+        )
+
         # all else is ignore.
         for t in (e.value for e in [
             NodeStatus.submitted,
