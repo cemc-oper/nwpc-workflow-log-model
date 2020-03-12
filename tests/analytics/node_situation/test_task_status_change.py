@@ -8,7 +8,7 @@ from nwpc_workflow_log_model.analytics.node_situation import (
     NodeStatus,
 )
 from nwpc_workflow_log_model.analytics.node_status_change_data import NodeStatusChangeData
-from nwpc_workflow_log_model.analytics.node_status_change_dfa import NodeStatusChangeDFA
+from nwpc_workflow_log_model.analytics.task_status_change_dfa import TaskStatusChangeDFA
 
 
 @NodeStatusChangeData.register
@@ -19,7 +19,7 @@ class StatusChange(object):
 
 
 def test_node_situation_dfa_change():
-    dfa = NodeStatusChangeDFA(name="test")
+    dfa = TaskStatusChangeDFA(name="test")
 
     change_to_queue_data = StatusChange(
         status=NodeStatus.queued,
@@ -112,7 +112,7 @@ def test_node_situation_dfa_change():
 
 
 def test_node_status_change_unknown():
-    dfa = NodeStatusChangeDFA(name="test")
+    dfa = TaskStatusChangeDFA(name="test")
     dfa.machine.set_state(SituationType.Unknown)
 
     assert dfa.state is SituationType.Unknown

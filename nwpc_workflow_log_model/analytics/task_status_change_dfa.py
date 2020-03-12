@@ -11,7 +11,7 @@ from nwpc_workflow_model.node_status import NodeStatus
 from transitions.extensions.diagrams import GraphMachine as Machine
 
 
-class NodeStatusChangeDFA(object):
+class TaskStatusChangeDFA(object):
     """
     根据 NodeStatusChangeData 数据分析 Task 节点的运行状态。
     基于有限状态机（DFA）实现。
@@ -23,7 +23,7 @@ class NodeStatusChangeDFA(object):
         self.node_situation = NodeSituation()
         self.machine = Machine(
             model=self,
-            states=NodeStatusChangeDFA.states,
+            states=TaskStatusChangeDFA.states,
             initial=SituationType.Initial,
             after_state_change=self.change_node_situation_type,
         )

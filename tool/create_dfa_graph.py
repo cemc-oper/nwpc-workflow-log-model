@@ -1,5 +1,5 @@
 import click
-from nwpc_workflow_log_model.analytics.node_status_change_dfa import NodeStatusChangeDFA
+from nwpc_workflow_log_model.analytics.task_status_change_dfa import TaskStatusChangeDFA
 
 
 @click.group()
@@ -11,7 +11,7 @@ def cli():
 @click.option("--name", default="ecflow", help="DFA's name")
 @click.option("--output-file", help="output file path", required=True)
 def node_status_change(name, output_file):
-    dfa = NodeStatusChangeDFA(name)
+    dfa = TaskStatusChangeDFA(name)
     dfa.get_graph().draw(output_file, prog='dot')
 
 
