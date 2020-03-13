@@ -4,9 +4,9 @@ from nwpc_workflow_log_model.analytics.node_situation import (
     NodeSituation,
     TimePoint,
     TimePeriodType,
-    SituationType,
     NodeStatus,
 )
+from nwpc_workflow_log_model.analytics.situation_type import TaskSituationType
 from nwpc_workflow_log_model.analytics.node_status_change_data import NodeStatusChangeData
 from nwpc_workflow_log_model.analytics.task_status_change_dfa import TaskStatusChangeDFA
 
@@ -31,7 +31,7 @@ def test_node_situation_dfa_change():
         node_data=change_to_queue_data,
     )
 
-    assert dfa.state is SituationType.CurrentQueue
+    assert dfa.state is TaskSituationType.CurrentQueue
     assert len(dfa.node_situation.time_points) == 1
     assert dfa.node_situation.time_points[0] == TimePoint(
         status=NodeStatus.queued,
@@ -46,7 +46,7 @@ def test_node_situation_dfa_change():
         NodeStatus.submitted.value,
         node_data=change_to_submitted_data
     )
-    assert dfa.state is SituationType.Submit
+    assert dfa.state is TaskSituationType.Submit
     assert len(dfa.node_situation.time_points) == 2
     assert dfa.node_situation.time_points[-1] == TimePoint(
         status=NodeStatus.submitted,
@@ -61,7 +61,7 @@ def test_node_situation_dfa_change():
         NodeStatus.active.value,
         node_data=change_to_active_data
     )
-    assert dfa.state is SituationType.Active
+    assert dfa.state is TaskSituationType.Active
     assert len(dfa.node_situation.time_points) == 3
     assert dfa.node_situation.time_points[-1] == TimePoint(
         status=NodeStatus.active,
@@ -76,7 +76,7 @@ def test_node_situation_dfa_change():
         NodeStatus.complete.value,
         node_data=change_to_complete_data
     )
-    assert dfa.state is SituationType.Complete
+    assert dfa.state is TaskSituationType.Complete
     assert len(dfa.node_situation.time_points) == 4
     assert dfa.node_situation.time_points[-1] == TimePoint(
         status=NodeStatus.complete,
@@ -113,9 +113,9 @@ def test_node_situation_dfa_change():
 
 def test_node_status_change_unknown():
     dfa = TaskStatusChangeDFA(name="test")
-    dfa.machine.set_state(SituationType.Unknown)
+    dfa.machine.set_state(TaskSituationType.Unknown)
 
-    assert dfa.state is SituationType.Unknown
+    assert dfa.state is TaskSituationType.Unknown
 
     change_to_complete_data = StatusChange(
         status=NodeStatus.complete,
@@ -125,5 +125,5 @@ def test_node_status_change_unknown():
         NodeStatus.complete.value,
         node_data=change_to_complete_data
     )
-    assert dfa.state is SituationType.Unknown
+    assert dfa.state is TaskSituationType.Unknown
     assert len(dfa.node_situation.time_points) == 0

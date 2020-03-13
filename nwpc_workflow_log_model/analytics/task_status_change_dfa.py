@@ -1,10 +1,10 @@
 from .node_situation import (
     NodeSituation,
-    SituationType,
     TimePoint,
     TimePeriodType,
     TimePeriod,
 )
+from .situation_type import TaskSituationType
 from .node_status_change_data import NodeStatusChangeData
 from nwpc_workflow_model.node_status import NodeStatus
 
@@ -16,7 +16,7 @@ class TaskStatusChangeDFA(object):
     根据 NodeStatusChangeData 数据分析 Task 节点的运行状态。
     基于有限状态机（DFA）实现。
     """
-    states = [e for e in SituationType]
+    states = [e for e in TaskSituationType]
 
     def __init__(self, name):
         self.name = name
@@ -24,7 +24,7 @@ class TaskStatusChangeDFA(object):
         self.machine = Machine(
             model=self,
             states=TaskStatusChangeDFA.states,
-            initial=SituationType.Initial,
+            initial=TaskSituationType.Initial,
             after_state_change=self.change_node_situation_type,
         )
 
@@ -109,12 +109,12 @@ class TaskStatusChangeDFA(object):
     def _initial_transitions_for_init(self):
         """Find NodeStatus.queued for Initial state and ignore others.
         """
-        source = SituationType.Initial
+        source = TaskSituationType.Initial
         # queue enters CurrentQueue
         self.machine.add_transition(
             trigger=NodeStatus.queued.value,
             source=source,
-            dest=SituationType.CurrentQueue,
+            dest=TaskSituationType.CurrentQueue,
             before=self.add_node_data,
             after=self.enter_new_cycle,
         )
@@ -125,7 +125,7 @@ class TaskStatusChangeDFA(object):
         self.machine.add_transition(
             trigger=NodeStatus.submitted.value,
             source=source,
-            dest=SituationType.Submit,
+            dest=TaskSituationType.Submit,
             before=self.add_node_data,
             after=[self.enter_new_cycle, self.set_cycle_time_point],
         )
@@ -144,11 +144,11 @@ class TaskStatusChangeDFA(object):
             )
 
     def _initial_transitions_for_current_queue(self):
-        source = SituationType.CurrentQueue
+        source = TaskSituationType.CurrentQueue
         self.machine.add_transition(
             trigger=NodeStatus.submitted.value,
             source=source,
-            dest=SituationType.Submit,
+            dest=TaskSituationType.Submit,
             before=self.add_node_data,
             after=self.set_cycle_time_point,
         )
@@ -156,7 +156,7 @@ class TaskStatusChangeDFA(object):
         self.machine.add_transition(
             trigger=NodeStatus.active.value,
             source=source,
-            dest=SituationType.Active,
+            dest=TaskSituationType.Active,
             before=self.add_node_data,
             after=self.set_cycle_time_point,
         )
@@ -165,7 +165,7 @@ class TaskStatusChangeDFA(object):
         self.machine.add_transition(
             trigger=NodeStatus.aborted.value,
             source=source,
-            dest=SituationType.Error,
+            dest=TaskSituationType.Error,
             before=self.add_node_data,
             after=self.set_cycle_time_point,
         )
@@ -175,16 +175,16 @@ class TaskStatusChangeDFA(object):
             self.machine.add_transition(
                 trigger=s.value,
                 source=source,
-                dest=SituationType.Unknown,
+                dest=TaskSituationType.Unknown,
             )
 
     def _initial_transitions_for_submit(self):
-        source = SituationType.Submit
+        source = TaskSituationType.Submit
 
         self.machine.add_transition(
             trigger=NodeStatus.active.value,
             source=source,
-            dest=SituationType.Active,
+            dest=TaskSituationType.Active,
             before=self.add_node_data,
             after=self.set_cycle_time_point,
         )
@@ -192,7 +192,7 @@ class TaskStatusChangeDFA(object):
         self.machine.add_transition(
             trigger=NodeStatus.aborted.value,
             source=source,
-            dest=SituationType.Error,
+            dest=TaskSituationType.Error,
             before=self.add_node_data,
             after=self.set_cycle_time_point,
         )
@@ -201,16 +201,16 @@ class TaskStatusChangeDFA(object):
             self.machine.add_transition(
                 trigger=s.value,
                 source=source,
-                dest=SituationType.Unknown,
+                dest=TaskSituationType.Unknown,
             )
 
     def _initial_transitions_for_active(self):
-        source = SituationType.Active
+        source = TaskSituationType.Active
 
         self.machine.add_transition(
             trigger=NodeStatus.complete.value,
             source=source,
-            dest=SituationType.Complete,
+            dest=TaskSituationType.Complete,
             before=self.add_node_data,
             after=[
                 self.set_cycle_time_point,
@@ -221,7 +221,7 @@ class TaskStatusChangeDFA(object):
         self.machine.add_transition(
             trigger=NodeStatus.aborted.value,
             source=source,
-            dest=SituationType.Error,
+            dest=TaskSituationType.Error,
             before=self.add_node_data,
             after=self.set_cycle_time_point,
         )
@@ -230,11 +230,11 @@ class TaskStatusChangeDFA(object):
             self.machine.add_transition(
                 trigger=s.value,
                 source=source,
-                dest=SituationType.Unknown,
+                dest=TaskSituationType.Unknown,
             )
 
     def _initial_transitions_for_unknown(self):
-        source = SituationType.Unknown
+        source = TaskSituationType.Unknown
         for t in (e.name for e in [
             NodeStatus.queued,
             NodeStatus.submitted,
