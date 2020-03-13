@@ -16,3 +16,16 @@ class TaskSituationType(Enum):
     Complete = "complete"  # 正常结束
     Error = "error"  # 运行出错
     Unknown = "unknown"  # 未知状态
+
+
+class FamilySituationType(Enum):
+    """
+    Family节点运行状态
+    """
+    Initial = "initial"
+    LastComplete = "last_complete"
+    CurrentQueue = "current_queue"
+    CurrentRun = "current_run"
+    Complete = "complete"
+    Error = "error"
+    Unknown = "unknown"
