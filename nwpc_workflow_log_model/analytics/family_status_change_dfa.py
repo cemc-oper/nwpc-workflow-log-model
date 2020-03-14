@@ -10,8 +10,10 @@ from .node_situation import TimePoint, TimePeriod, TimePeriodType
 class FamilyStatusChangeDFA(object):
     states = [e for e in FamilySituationType]
 
-    def __init__(self, name):
+    def __init__(self, name, ignore_aborted: bool = False):
         self.name = name
+        self._ignore_aborted = ignore_aborted
+
         self.node_situation = NodeSituation()
         self.machine = Machine(
             model=self,
@@ -122,13 +124,22 @@ class FamilyStatusChangeDFA(object):
             after=self.enter_new_cycle,
         )
 
-        # all else is unknown.
-        for t in (e.value for e in [
+        unknown_triggers = [
             NodeStatus.submitted,
             NodeStatus.active,
             NodeStatus.complete,
             NodeStatus.aborted
-        ]):
+        ]
+        if self._ignore_aborted:
+            unknown_triggers = unknown_triggers[:-1]
+            self.machine.add_transition(
+                trigger=NodeStatus.aborted.value,
+                source=source,
+                dest="=",
+            )
+
+        # all else is unknown.
+        for t in (e.value for e in unknown_triggers):
             self.machine.add_transition(
                 trigger=t,
                 source=source,
@@ -154,13 +165,20 @@ class FamilyStatusChangeDFA(object):
         )
 
         # aborted enters Error
-        self.machine.add_transition(
-            trigger=NodeStatus.aborted.value,
-            source=source,
-            dest=FamilySituationType.Error,
-            before=self.add_node_data,
-            after=self.set_cycle_time_point,
-        )
+        if self._ignore_aborted:
+            self.machine.add_transition(
+                trigger=NodeStatus.aborted.value,
+                source=source,
+                dest="=",
+            )
+        else:
+            self.machine.add_transition(
+                trigger=NodeStatus.aborted.value,
+                source=source,
+                dest=FamilySituationType.Error,
+                before=self.add_node_data,
+                after=self.set_cycle_time_point,
+            )
 
         # complete and queued enter Unknown
         for s in (NodeStatus.complete, NodeStatus.queued):
@@ -183,15 +201,22 @@ class FamilyStatusChangeDFA(object):
             ],
         )
 
-        self.machine.add_transition(
-            trigger=NodeStatus.aborted.value,
-            source=source,
-            dest=FamilySituationType.Error,
-            before=self.add_node_data,
-            after=[
-                self.set_cycle_time_point,
-            ],
-        )
+        if self._ignore_aborted:
+            self.machine.add_transition(
+                trigger=NodeStatus.aborted.value,
+                source=source,
+                dest="=",
+            )
+        else:
+            self.machine.add_transition(
+                trigger=NodeStatus.aborted.value,
+                source=source,
+                dest=FamilySituationType.Error,
+                before=self.add_node_data,
+                after=[
+                    self.set_cycle_time_point,
+                ],
+            )
 
         # all else is ignore.
         for t in (e.value for e in [
