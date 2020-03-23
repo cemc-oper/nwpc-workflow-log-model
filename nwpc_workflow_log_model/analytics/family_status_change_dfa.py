@@ -97,7 +97,10 @@ class FamilyStatusChangeDFA(object):
             source=source,
             dest=FamilySituationType.CurrentRun,
             before=self.add_node_data,
-            after=self.enter_new_cycle,
+            after=[
+                self.enter_new_cycle,
+                self.set_cycle_time_point,
+            ],
         )
 
         # all else is ignore.
