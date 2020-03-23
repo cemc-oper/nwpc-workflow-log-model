@@ -1,4 +1,4 @@
-from transitions.extensions.diagrams import GraphMachine as Machine
+from transitions import Machine
 from nwpc_workflow_model.node_status import NodeStatus
 
 from .situation_type import FamilySituationType
@@ -8,8 +8,6 @@ from .node_situation import TimePoint, TimePeriod, TimePeriodType
 
 
 class FamilyStatusChangeDFA(object):
-    states = [e for e in FamilySituationType]
-
     def __init__(self, name, ignore_aborted: bool = False):
         self.name = name
         self._ignore_aborted = ignore_aborted
@@ -17,7 +15,7 @@ class FamilyStatusChangeDFA(object):
         self.node_situation = NodeSituation()
         self.machine = Machine(
             model=self,
-            states=FamilyStatusChangeDFA.states,
+            states=FamilySituationType,
             initial=FamilySituationType.Initial,
             after_state_change=self.change_node_situation_type,
         )
