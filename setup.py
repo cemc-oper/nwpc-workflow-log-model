@@ -45,7 +45,7 @@ setup(
         "mongoengine",
         "sqlalchemy",
         "transitions>=0.8.0",
-        "pygraphviz",
+        # "pygraphviz",
         "nwpc-workflow-model>=0.5,<0.6"
     ],
 

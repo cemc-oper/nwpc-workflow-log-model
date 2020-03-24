@@ -1,4 +1,5 @@
 from transitions import Machine
+
 from nwpc_workflow_model.node_status import NodeStatus
 
 from .situation_type import FamilySituationType

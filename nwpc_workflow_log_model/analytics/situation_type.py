@@ -3,11 +3,11 @@ from enum import Enum
 
 class TaskSituationType(Enum):
     """
-    运行状态
+    Task节点的运行状态
 
     Notes
     -----
-    与节点状态 NodeStatus 不同，来自于对节点状态 NodeStatus 序列的分析
+    与节点状态``NodeStatus``不同，来自于对节点状态``NodeStatus``序列的分析
     """
     Initial = "initial"  # 初始状态
     CurrentQueue = "current_queue"  # 每次循环的开始
@@ -20,12 +20,12 @@ class TaskSituationType(Enum):
 
 class FamilySituationType(Enum):
     """
-    Family节点运行状态
+    Family节点的运行状态
     """
-    Initial = "initial"
-    LastComplete = "last_complete"
-    CurrentQueue = "current_queue"
-    CurrentRun = "current_run"
-    Complete = "complete"
+    Initial = "initial"  # initial situation, means nothing.
+    LastComplete = "last_complete"  # complete situation of previous cycle, usually cycle run for last day.
+    CurrentQueue = "current_queue"  # queue for current day's cycle.
+    CurrentRun = "current_run"  # run for current day.
+    Complete = "complete"  # first complete for current day
     Error = "error"
     Unknown = "unknown"

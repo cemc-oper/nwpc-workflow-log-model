@@ -4,7 +4,10 @@ import datetime
 
 from nwpc_workflow_model.node_status import NodeStatus
 
-from .situation_type import TaskSituationType
+from .situation_type import (
+    TaskSituationType,
+    FamilySituationType,
+)
 
 
 class TimePoint(object):
@@ -53,7 +56,7 @@ class NodeSituation(object):
     """
     def __init__(
             self,
-            situation: TaskSituationType = TaskSituationType.Initial,
+            situation: TaskSituationType or FamilySituationType = TaskSituationType.Initial,
             time_points: List[TimePoint] = None,
             time_periods: List[TimePeriod] = None,
     ):

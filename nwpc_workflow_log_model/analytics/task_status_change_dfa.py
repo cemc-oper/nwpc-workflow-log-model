@@ -1,3 +1,7 @@
+from transitions import Machine
+
+from nwpc_workflow_model.node_status import NodeStatus
+
 from .node_situation import (
     NodeSituation,
     TimePoint,
@@ -6,9 +10,6 @@ from .node_situation import (
 )
 from .situation_type import TaskSituationType
 from .node_status_change_data import NodeStatusChangeData
-from nwpc_workflow_model.node_status import NodeStatus
-
-from transitions import Machine
 
 
 class TaskStatusChangeDFA(object):
