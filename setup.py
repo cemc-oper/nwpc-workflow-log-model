@@ -17,7 +17,7 @@ setup(
 
     version=version,
 
-    description="A database model for workflow log in NWPC.",
+    description="A data model for workflow log in NWPC.",
     long_description=long_description,
     long_description_content_type="text/markdown",
 
