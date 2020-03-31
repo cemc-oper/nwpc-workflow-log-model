@@ -1,12 +1,20 @@
 # nwpc-workflow-log-model
 
-A database model for workflow log in NWPC.
+A data model for workflow log in NWPC.
 
 ## Introduction
 
 Model classes for MongoDB and relational database.
 
-## MongoDB
+### Log Record
+
+Record object and parser for ecFlow and SMS.
+
+### Analytics
+
+Record object and algorithm for analytics.
+
+### MongoDB
 
 Use MongoDB to store analytics results including node tree and node status.
 
@@ -14,7 +22,7 @@ Use MongoDB to store analytics results including node tree and node status.
 - `NodeTreeBlob`: blob for node tree.
 - `NodeStatusBlob`: blob for node status.
 
-## relational database
+### Relational database
 
 - `owner`: Owner table
 - `repo`: Repo table
