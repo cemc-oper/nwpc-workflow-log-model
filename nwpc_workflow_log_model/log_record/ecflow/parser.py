@@ -59,7 +59,10 @@ class EcflowLogParser(object):
                 log_record=line,
             )
             start_pos += 4
-            log_record.parse_record(line[start_pos:])
+            log_record.parse_record(
+                line[start_pos:],
+                debug=True,
+            )
         elif line[start_pos: start_pos + 4] == "svr:":
             # server
             # MSG:[05:41:25 2.2.2020] svr:check_pt in 0 seconds

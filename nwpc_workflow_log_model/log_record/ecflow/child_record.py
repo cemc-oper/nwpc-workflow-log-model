@@ -23,7 +23,11 @@ class ChildLogRecord(EcflowLogRecord):
         self.event_type: EventType = EventType.Child
         self.command: str or None = None
 
-    def parse_record(self, line: str):
+    def parse_record(
+            self,
+            line: str,
+            debug: bool = False,
+    ):
         """
         Parse child line
 
@@ -37,6 +41,9 @@ class ChildLogRecord(EcflowLogRecord):
         ----------
         line: str
             part of log line after 'chd:'
+
+        debug: bool
+            show debug information
 
         Examples
         --------
@@ -55,7 +62,8 @@ class ChildLogRecord(EcflowLogRecord):
         start_pos = 0
         end_pos = line.find(" ", start_pos)
         if end_pos == -1:
-            # print("[ERROR] child record: event not found =>", self.log_record)
+            if debug:
+                logger.error(f"[ERROR] child record: event not found => {self.log_record}")
             return
         event = line[start_pos:end_pos]
         self.event = event
@@ -81,7 +89,8 @@ class ChildLogRecord(EcflowLogRecord):
                 self.node_path = tokens[1]
                 self.additional_attrs["event_name"] = tokens[0]
             else:
-                # print("[ERROR] child record: parse error =>", self.log_record)
+                if debug:
+                    logger.debug(f"[ERROR] child record: parse error => {self.log_record}")
                 pass
         elif event == "meter":
             # MSG:[13:39:38 14.5.2020] chd:meter forecastHours 12 /grapes_tym/grapes_d01/06/model/grapes_monitor
@@ -93,19 +102,18 @@ class ChildLogRecord(EcflowLogRecord):
                 self.additional_attrs["meter_name"] = tokens[0]
                 self.additional_attrs["meter_value"] = int(tokens[1])
             else:
-                # print("[ERROR] child record: parse error =>", self.log_record)
+                if debug:
+                    logger.error(f"[ERROR] child record: parse error => {self.log_record}")
                 pass
         elif event == "label":
             # MSG:[13:56:02 14.5.2020] chd:label info 'checking for 066...' /gmf_grapes_gfs_post/06/initial_togrib2
             start_pos = end_pos + 1
             line = line[start_pos:]
-            tokens = line.split(" ")
-            if len(tokens) == 3:
-                self.node_path = tokens[2]
-                self.additional_attrs["label_name"] = tokens[0]
-                self.additional_attrs["label_value"] = tokens[1]
-            else:
-                # print("[ERROR] child record: parse error =>", self.log_record)
-                pass
+            line = line.rstrip()
+            name_end_pos = line.find(" ")
+            self.additional_attrs["label_name"] = line[:name_end_pos]
+            node_start_pos = line.rfind(" ")
+            self.node_path = line[node_start_pos+1:]
+            self.additional_attrs["label_value"] = line[name_end_pos+2: node_start_pos-1]
         else:
             logger.error("child record: event not supported =>", self.log_record)
