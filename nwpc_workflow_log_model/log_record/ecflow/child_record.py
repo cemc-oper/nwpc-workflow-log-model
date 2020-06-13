@@ -72,15 +72,38 @@ class ChildLogRecord(EcflowLogRecord):
                 #  /3km_post/06/3km_togrib2/grib2WORK/030/after_data2grib2_030  trap
                 self.node_path = line[start_pos:end_pos]
                 self.additional_attrs["reason"] = line[end_pos + 1:]
-        elif event in ("meter", "label", "event"):
-            # MSG:[09:24:06 29.6.2018] chd:event transmissiondone
-            #  /gmf_grapes_025L60_v2.2_post/00/tograph/base/015/AN_AEA/QFLXDIV_P700_AN_AEA_sep_015
+        elif event == "event":
+            # MSG:[13:23:49 14.5.2020] chd:event unavailable /obs_rafs/09/pre_data/radar/SASB/9311/read
             start_pos = end_pos + 1
             line = line[start_pos:]
-            node_path_start_pos = line.rfind(" ")
-            if node_path_start_pos != -1:
-                self.node_path = line[node_path_start_pos + 1:]
-                self.additional_attrs["event"] = line[:node_path_start_pos]
+            tokens = line.split(" ")
+            if len(tokens) == 2:
+                self.node_path = tokens[1]
+                self.additional_attrs["event_name"] = tokens[0]
+            else:
+                # print("[ERROR] child record: parse error =>", self.log_record)
+                pass
+        elif event == "meter":
+            # MSG:[13:39:38 14.5.2020] chd:meter forecastHours 12 /grapes_tym/grapes_d01/06/model/grapes_monitor
+            start_pos = end_pos + 1
+            line = line[start_pos:]
+            tokens = line.split(" ")
+            if len(tokens) == 3:
+                self.node_path = tokens[2]
+                self.additional_attrs["meter_name"] = tokens[0]
+                self.additional_attrs["meter_value"] = int(tokens[1])
+            else:
+                # print("[ERROR] child record: parse error =>", self.log_record)
+                pass
+        elif event == "label":
+            # MSG:[13:56:02 14.5.2020] chd:label info 'checking for 066...' /gmf_grapes_gfs_post/06/initial_togrib2
+            start_pos = end_pos + 1
+            line = line[start_pos:]
+            tokens = line.split(" ")
+            if len(tokens) == 3:
+                self.node_path = tokens[2]
+                self.additional_attrs["label_name"] = tokens[0]
+                self.additional_attrs["label_value"] = tokens[1]
             else:
                 # print("[ERROR] child record: parse error =>", self.log_record)
                 pass
