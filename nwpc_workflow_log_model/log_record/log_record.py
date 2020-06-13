@@ -24,5 +24,11 @@ class LogRecord(object):
         self.additional_attrs: dict = {}
         self.log_record: str or None = None
 
+    def __str__(self):
+        return f"{self.log_record}"
+
+    def __repr__(self):
+        return f"[{self.__class__.__name__}] {self.log_record}"
+
     def parse(self, line: str):
         pass
