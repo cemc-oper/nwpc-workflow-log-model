@@ -1,1 +1,4 @@
-from .log_record import LogRecord
+from .log_record import (
+    LogRecord,
+    LogType
+)

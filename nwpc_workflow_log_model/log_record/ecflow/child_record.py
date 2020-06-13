@@ -1,3 +1,5 @@
+import datetime
+
 from loguru import logger
 
 from .record import EcflowLogRecord, LogType, EventType
@@ -6,10 +8,10 @@ from .record import EcflowLogRecord, LogType, EventType
 class ChildLogRecord(EcflowLogRecord):
     def __init__(
             self,
-            log_type=LogType.Unknown,
-            date=None,
-            time=None,
-            log_record=None
+            log_type: LogType = LogType.Unknown,
+            date: datetime.date = None,
+            time: datetime.time = None,
+            log_record: str = None,
     ):
         EcflowLogRecord.__init__(
             self,
@@ -18,8 +20,8 @@ class ChildLogRecord(EcflowLogRecord):
             time=time,
             log_record=log_record
         )
-        self.event_type = EventType.Child
-        self.command = None
+        self.event_type: EventType = EventType.Child
+        self.command: str or None = None
 
     def parse_record(self, line: str):
         """
@@ -27,14 +29,27 @@ class ChildLogRecord(EcflowLogRecord):
 
         Example lines:
             MSG:[13:33:57 8.1.2020] chd:init /grapes_reps_v3_2/06/members/mem09/pre_data/gmf_get/gmf_get_030
+            <- EcflowLogParser.parse -> <----------------   ChildLogRecord.parse_record   ----------------->
             MSG:[14:02:38 8.1.2020] chd:meter fcstHours 0 /grapes_reps_v3_2/06/members/mem02/model/fcst_monitor
+            <- EcflowLogParser.parse -> <-----------------   ChildLogRecord.parse_record   ------------------->
 
         Parameters
         ----------
         line: str
+            part of log line after 'chd:'
 
-        Returns
-        -------
+        Examples
+        --------
+
+        >>> log_line = "MSG:[13:33:57 8.1.2020] chd:init /grapes_reps_v3_2/06/members/mem09/pre_data/gmf_get/gmf_get_030"
+        >>> log_line[28:]
+        'init /grapes_reps_v3_2/06/members/mem09/pre_data/gmf_get/gmf_get_030'
+        >>> record = ChildLogRecord()
+        >>> record.parse_record(log_line[28:])
+        >>> record.event
+        'init'
+        >>> record.node_path
+        '/grapes_reps_v3_2/06/members/mem09/pre_data/gmf_get/gmf_get_030'
 
         """
         start_pos = 0

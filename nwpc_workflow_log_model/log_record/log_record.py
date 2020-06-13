@@ -1,4 +1,4 @@
-from datetime import date, time
+import datetime
 from enum import Enum
 
 
@@ -17,8 +17,8 @@ class LogType(Enum):
 class LogRecord(object):
     def __init__(self):
         self.log_type: LogType = LogType.Unknown
-        self.date: date or None = None
-        self.time: time or None = None
+        self.date: datetime.date or None = None
+        self.time: datetime.time or None = None
         self.event: str or None = None
         self.node_path: str or None = None
         self.additional_attrs: dict = {}
@@ -31,4 +31,4 @@ class LogRecord(object):
         return f"[{self.__class__.__name__}] {self.log_record}"
 
     def parse(self, line: str):
-        pass
+        raise NotImplemented("LogRecord is an abstract class.")
