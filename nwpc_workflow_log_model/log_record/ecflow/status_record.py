@@ -78,7 +78,13 @@ class StatusLogRecord(EcflowLogRecord):
                 self.node_path = status_line[start_pos:end_pos]
                 start_pos = end_pos + 1
                 end_pos = status_line.find(":", start_pos)
-                self.additional_attrs["job_size"] = int(status_line[end_pos + 1:])
+                try:
+                    self.additional_attrs["job_size"] = int(status_line[end_pos + 1:])
+                except ValueError:
+                    # LOG:[00:23:58 15.5.2020]  complete: /gmf_grapes_gfs_post/12/upload/ftp_togrib2/upload_togrib2_global/upload_togrib2_006
+                    # LOG:[00:23:58 15.5.2020]  submitted: /gmf_grapes_gfs_post/12/upload/ftp_togrib2/upload_togrib2_global/upload_togrib2_054 job_size:9824MSG:[03:58:52 15.5.2020] Ecflow version(4.11.1) boost(1.53.0) compiler(gcc 4.8.5) protocol(TEXT_ARCHIVE) Compiled on Dec 25 2018 06:53:21
+                    # MSG:[03:58:52 15.5.2020] Started at 2020-May-15 03:58:52 universal time
+                    pass
         elif event in ("unknown",):
             self.status = NodeStatus[event]
             # just ignore
