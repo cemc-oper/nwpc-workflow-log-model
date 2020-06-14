@@ -77,8 +77,6 @@ class EcflowLogParser(object):
             if not self.options[EventType.Server]["enable"]:
                 return log_record
             date_time = self._parse_datetime(date_time_token)
-            log_record.date = date_time.date()
-            log_record.time = date_time.time()
             log_record = StatusLogRecord(
                 log_type=log_type,
                 date=date_time.date(),
@@ -91,8 +89,6 @@ class EcflowLogParser(object):
             if not self.options[EventType.Client]["enable"]:
                 return log_record
             date_time = self._parse_datetime(date_time_token)
-            log_record.date = date_time.date()
-            log_record.time = date_time.time()
             log_record = ClientLogRecord(
                 log_type=log_type,
                 date=date_time.date(),
@@ -106,8 +102,6 @@ class EcflowLogParser(object):
             if not self.options[EventType.Child]["enable"]:
                 return log_record
             date_time = self._parse_datetime(date_time_token)
-            log_record.date = date_time.date()
-            log_record.time = date_time.time()
             log_record = ChildLogRecord(
                 log_type=log_type,
                 date=date_time.date(),
@@ -125,8 +119,6 @@ class EcflowLogParser(object):
             if not self.options[EventType.Server]["enable"]:
                 return log_record
             date_time = self._parse_datetime(date_time_token)
-            log_record.date = date_time.date()
-            log_record.time = date_time.time()
             log_record = ServerLogRecord(
                 log_type=log_type,
                 date=date_time.date(),
