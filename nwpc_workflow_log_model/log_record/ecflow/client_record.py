@@ -1,13 +1,17 @@
+import datetime
+
+from loguru import logger
+
 from .record import EcflowLogRecord, LogType, EventType
 
 
 class ClientLogRecord(EcflowLogRecord):
     def __init__(
             self,
-            log_type=LogType.Unknown,
-            date=None,
-            time=None,
-            log_record=None
+            log_type: LogType = LogType.Unknown,
+            date: datetime.date = None,
+            time: datetime.time = None,
+            log_record: str = None,
     ):
         EcflowLogRecord.__init__(
             self,
@@ -16,48 +20,61 @@ class ClientLogRecord(EcflowLogRecord):
             time=time,
             log_record=log_record
         )
-        self.event_type = EventType.Client
-        self.command = None
+        self.event_type: EventType = EventType.Client
+        self.command: str or None = None
 
-    def parse_record(self, line: str):
+    def parse_record(
+            self,
+            line: str,
+            debug: bool = False,
+    ):
         """
         Parse client record
 
         Example
             MSG:[06:35:57 12.1.2020] --force=complete /grapes_geps_v1_2/00/members/pair_05/mem02/model/forecast  :nwp
+            < EcflowLogParser.parse ><----------------------   ClientLogRecord.parse_record  ----------------------->
+
             MSG:[13:30:29 8.1.2020] --news=0 1 0  :nwp [:NO_NEWS]
+            <EcflowLogParser.parse> <ClientLogRecord.parse_record>
+
             MSG:[13:30:35 8.1.2020] --server_version :nwp
             MSG:[13:30:35 8.1.2020] --sync_full=0 :nwp
 
         Parameters
         ----------
         line: str
-
-        Returns
-        -------
+        debug: bool
 
         """
         start_pos = 0
         end_pos = line.find(" ", start_pos)
         if end_pos == -1:
-            # print("[ERROR] client record: event not found =>", self.log_record)
+            if debug:
+                logger.error(f"[ERROR] client record: event not found => {self.log_record}")
             return
         event = line[start_pos:end_pos]
 
         if event == "requeue":
             # MSG:[07:50:49 31.1.2020] --requeue force /grapes_reps_v3_2/00/control/model/fcst_monitor  :nwp_qu
+            # MSG:[02:06:46 9.6.2020] --requeue force /grapes_tym_post/12/data/000/shanxi /grapes_tym_post/12/data/001/shanxi /grapes_tym_post/12/data/002/shanxi /grapes_tym_post/12/data/003/shanxi /grapes_tym_post/12/data/004/shanxi /grapes_tym_post/12/data/005/shanxi /grapes_tym_post/12/data/006/shanxi /grapes_tym_post/12/data/007/shanxi /grapes_tym_post/12/data/008/shanxi /grapes_tym_post/12/data/009/shanxi  :nwp_pd
+            # MSG:[02:36:55 27.5.2020] --requeue force /meso_post/00/meso_chartos/rundir_area_1h/prep_1hr_10mw/prep_1hr_10mw_037 /meso_post/00/meso_chartos/rundir_area_1h/prep_1hr_10mw/prep_1hr_10mw_038  :nwp_pd
             self.event = event
             start_pos = end_pos + 1
             tokens = line[start_pos:].split()
-            if len(tokens) == 3:
+            if len(tokens) >= 3:
                 requeue_option = tokens[0]
-                node_path = tokens[1]
-                user = tokens[2]
-                self.node_path = node_path
+                node_path = tokens[1:-1]
+                user = tokens[-1]
+                if len(node_path) == 1:
+                    self.node_path = node_path[0]
+                else:
+                    self.node_path = node_path
                 self.additional_attrs["requeue_option"] = requeue_option
                 self.additional_attrs["user"] = user
             else:
-                # print("[ERROR] client record: requeue parse error =>", self.log_record)
+                if debug:
+                    logger.error(f"[ERROR] client record: requeue parse error => {self.log_record}")
                 return
         elif event in (
                 "alter",
@@ -136,6 +153,7 @@ class ClientLogRecord(EcflowLogRecord):
                 "server_version",
                 "ping",
                 "check_pt",
+                "get",
         ):
             # MSG:[13:26:35 8.1.2020] --restart :nwp_pd
 
@@ -151,6 +169,8 @@ class ClientLogRecord(EcflowLogRecord):
             # MSG:[11:40:17 9.1.2020] --server_version :nwp
 
             # MSG:[11:40:17 9.1.2020] --ping :nwp
+
+            # MSG:[00:20:04 26.5.2020] --get :csm_exp
 
             self.event = event
         elif (
@@ -169,9 +189,16 @@ class ClientLogRecord(EcflowLogRecord):
                 or event.startswith("order=")
                 or event.startswith("ch_register=")
                 or event.startswith("ch_drop=")
+                or event.startswith("get_state=")
+                or event.startswith("shutdown=")
         ):
+            # MSG:[00:34:26 26.5.2020] --get_state=/web_post_v1_0/GRAPES_MESO/FST/FST_getResult_03 :csm_exp
+
+            # MSG:[04:09:39 15.5.2020] --shutdown=yes :nwp_pd
+
             self.event = event[: event.find("=")]
         else:
             self.event = event
-            # print("[ERROR] client record: event not supported =>", self.log_record)
+            if debug:
+                logger.error(f"[ERROR] client record: event not supported => {self.log_record}")
         self.command = self.event

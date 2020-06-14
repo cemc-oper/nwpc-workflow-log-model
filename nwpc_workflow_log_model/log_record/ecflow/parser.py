@@ -96,7 +96,10 @@ class EcflowLogParser(object):
                 log_record=line,
             )
             start_pos += 2
-            log_record.parse_record(line[start_pos:])
+            log_record.parse_record(
+                line[start_pos:],
+                debug=self.options[EventType.Client]["debug"],
+            )
         elif line[start_pos: start_pos + 4] == "chd:":
             # child event
             if not self.options[EventType.Child]["enable"]:
