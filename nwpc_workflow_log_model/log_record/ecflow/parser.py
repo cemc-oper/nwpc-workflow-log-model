@@ -1,20 +1,61 @@
-from datetime import datetime
+import datetime
 
 from loguru import logger
+
+from nwpc_workflow_log_model.log_record import LogType
 
 from .record import EcflowLogRecord
 from .status_record import StatusLogRecord
 from .client_record import ClientLogRecord
 from .child_record import ChildLogRecord
 from .server_record import ServerLogRecord
-from .util import convert_ecflow_log_type
+from .util import convert_ecflow_log_type, EventType
 
 
 class EcflowLogParser(object):
     def __init__(self):
-        pass
+        self.options = {
+            "parser": {
+                "debug": True,
+            },
+            EventType.Status: {
+                "debug": True,
+                "enable": True,
+            },
+            EventType.Client: {
+                "debug": True,
+                "enable": True,
+            },
+            EventType.Child: {
+                "debug": True,
+                "enable": True,
+            },
+            EventType.Server: {
+                "debug": True,
+                "enable": True,
+            }
+        }
+
+    def disable_event_parse(self, event_type):
+        self.options[event_type]["enable"] = False
+
+    def enable_event_parse(self, event_type):
+        self.options[event_type]["enable"] = True
 
     def parse(self, line: str) -> EcflowLogRecord:
+        """
+        Parse ecflow log line.
+
+        Parameters
+        ----------
+        line: str
+            log line.
+
+        Returns
+        -------
+        EcflowLogRecord
+            if log line can't be parsed, return a default empty EcflowLogRecord object.
+        """
         log_record = EcflowLogRecord(log_record=line)
 
         start_pos = 0
@@ -25,7 +66,7 @@ class EcflowLogParser(object):
         start_pos = end_pos + 2
         end_pos = line.find("]", start_pos)
         if end_pos == -1:
-            logger.warning("can't find date and time => ", line)
+            logger.warning(f"can't find date and time => {line}")
             return log_record
         date_time = self._parse_datetime(line[start_pos:end_pos])
         log_record.date = date_time.date()
@@ -33,6 +74,8 @@ class EcflowLogParser(object):
 
         start_pos = end_pos + 2
         if line[start_pos: start_pos + 1] == " ":
+            if not self.options[EventType.Server]["enable"]:
+                return log_record
             log_record = StatusLogRecord(
                 log_type=log_type,
                 date=date_time.date(),
@@ -42,6 +85,8 @@ class EcflowLogParser(object):
             start_pos += 1
             log_record.parse_record(line[start_pos:])
         elif line[start_pos: start_pos + 2] == "--":
+            if not self.options[EventType.Client]["enable"]:
+                return log_record
             log_record = ClientLogRecord(
                 log_type=log_type,
                 date=date_time.date(),
@@ -52,6 +97,8 @@ class EcflowLogParser(object):
             log_record.parse_record(line[start_pos:])
         elif line[start_pos: start_pos + 4] == "chd:":
             # child event
+            if not self.options[EventType.Child]["enable"]:
+                return log_record
             log_record = ChildLogRecord(
                 log_type=log_type,
                 date=date_time.date(),
@@ -61,11 +108,13 @@ class EcflowLogParser(object):
             start_pos += 4
             log_record.parse_record(
                 line[start_pos:],
-                debug=True,
+                debug=self.options[EventType.Child]["debug"],
             )
         elif line[start_pos: start_pos + 4] == "svr:":
             # server
             # MSG:[05:41:25 2.2.2020] svr:check_pt in 0 seconds
+            if not self.options[EventType.Server]["enable"]:
+                return log_record
             log_record = ServerLogRecord(
                 log_type=log_type,
                 date=date_time.date(),
@@ -89,10 +138,10 @@ class EcflowLogParser(object):
 
         return log_record
 
-    def _parse_log_type(self, token: str):
+    def _parse_log_type(self, token: str) -> LogType:
         log_type = convert_ecflow_log_type(token)
         return log_type
 
-    def _parse_datetime(self, token: str):
-        date_time = datetime.strptime(token, "%H:%M:%S %d.%m.%Y")
+    def _parse_datetime(self, token: str) -> datetime.datetime:
+        date_time = datetime.datetime.strptime(token, "%H:%M:%S %d.%m.%Y")
         return date_time
