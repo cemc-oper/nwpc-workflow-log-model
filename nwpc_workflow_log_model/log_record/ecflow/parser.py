@@ -60,7 +60,8 @@ class EcflowLogParser(object):
 
         start_pos = 0
         end_pos = line.find(":")
-        log_type = self._parse_log_type(line[start_pos:end_pos])
+        log_type_token = line[start_pos:end_pos]
+        log_type = self._parse_log_type(log_type_token)
         log_record.log_type = log_type
 
         start_pos = end_pos + 2
@@ -68,14 +69,16 @@ class EcflowLogParser(object):
         if end_pos == -1:
             logger.warning(f"can't find date and time => {line}")
             return log_record
-        date_time = self._parse_datetime(line[start_pos:end_pos])
-        log_record.date = date_time.date()
-        log_record.time = date_time.time()
+
+        date_time_token = line[start_pos:end_pos]
 
         start_pos = end_pos + 2
         if line[start_pos: start_pos + 1] == " ":
             if not self.options[EventType.Server]["enable"]:
                 return log_record
+            date_time = self._parse_datetime(date_time_token)
+            log_record.date = date_time.date()
+            log_record.time = date_time.time()
             log_record = StatusLogRecord(
                 log_type=log_type,
                 date=date_time.date(),
@@ -87,6 +90,9 @@ class EcflowLogParser(object):
         elif line[start_pos: start_pos + 2] == "--":
             if not self.options[EventType.Client]["enable"]:
                 return log_record
+            date_time = self._parse_datetime(date_time_token)
+            log_record.date = date_time.date()
+            log_record.time = date_time.time()
             log_record = ClientLogRecord(
                 log_type=log_type,
                 date=date_time.date(),
@@ -99,6 +105,9 @@ class EcflowLogParser(object):
             # child event
             if not self.options[EventType.Child]["enable"]:
                 return log_record
+            date_time = self._parse_datetime(date_time_token)
+            log_record.date = date_time.date()
+            log_record.time = date_time.time()
             log_record = ChildLogRecord(
                 log_type=log_type,
                 date=date_time.date(),
@@ -115,6 +124,9 @@ class EcflowLogParser(object):
             # MSG:[05:41:25 2.2.2020] svr:check_pt in 0 seconds
             if not self.options[EventType.Server]["enable"]:
                 return log_record
+            date_time = self._parse_datetime(date_time_token)
+            log_record.date = date_time.date()
+            log_record.time = date_time.time()
             log_record = ServerLogRecord(
                 log_type=log_type,
                 date=date_time.date(),
@@ -124,6 +136,10 @@ class EcflowLogParser(object):
             start_pos += 4
             log_record.parse_record(line[start_pos:])
         elif len(line[start_pos:].strip()) > 0:
+            # date_time = self._parse_datetime(date_time_token)
+            # log_record.date = date_time.date()
+            # log_record.time = date_time.time()
+
             # NOTE: line[start_pos].strip() will be empty but I haven't found example line.
             if line[start_pos:].strip()[0].isupper():
                 # WAR:[09:00:08 6.8.2018] Job generation for task /grapes_emer_v1_1/00/plot/get_plot/get_plot_meso
@@ -132,6 +148,10 @@ class EcflowLogParser(object):
             else:
                 pass
         else:
+            # date_time = self._parse_datetime(date_time_token)
+            # log_record.date = date_time.date()
+            # log_record.time = date_time.time()
+
             # not supported
             # print("[not supported]", line)
             pass
