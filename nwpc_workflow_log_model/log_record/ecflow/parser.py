@@ -33,6 +33,10 @@ class EcflowLogParser(object):
             EventType.Server: {
                 "debug": False,
                 "enable": True,
+            },
+            EventType.Unknown: {
+                "debug": False,
+                "enable": False,
             }
         }
         if options is not None:
@@ -44,7 +48,7 @@ class EcflowLogParser(object):
     def enable_event_parse(self, event_type):
         self.options[event_type]["enable"] = True
 
-    def parse(self, line: str) -> EcflowLogRecord:
+    def parse(self, line: str) -> EcflowLogRecord or None:
         """
         Parse ecflow log line.
 
@@ -55,8 +59,8 @@ class EcflowLogParser(object):
 
         Returns
         -------
-        EcflowLogRecord
-            if log line can't be parsed, return a default empty EcflowLogRecord object.
+        EcflowLogRecord or None
+            if log line can't be parsed, return None.
         """
         log_record = EcflowLogRecord(log_record=line)
 
@@ -70,14 +74,14 @@ class EcflowLogParser(object):
         end_pos = line.find("]", start_pos)
         if end_pos == -1:
             logger.warning(f"can't find date and time => {line}")
-            return log_record
+            return None
 
         date_time_token = line[start_pos:end_pos]
 
         start_pos = end_pos + 2
         if line[start_pos: start_pos + 1] == " ":
             if not self.options[EventType.Status]["enable"]:
-                return log_record
+                return None
             date_time = self._parse_datetime(date_time_token)
             log_record = StatusLogRecord(
                 log_type=log_type,
@@ -90,9 +94,10 @@ class EcflowLogParser(object):
                 line[start_pos:],
                 debug=self.options[EventType.Status]["debug"],
             )
+            return log_record
         elif line[start_pos: start_pos + 2] == "--":
             if not self.options[EventType.Client]["enable"]:
-                return log_record
+                return None
             date_time = self._parse_datetime(date_time_token)
             log_record = ClientLogRecord(
                 log_type=log_type,
@@ -105,10 +110,11 @@ class EcflowLogParser(object):
                 line[start_pos:],
                 debug=self.options[EventType.Client]["debug"],
             )
+            return log_record
         elif line[start_pos: start_pos + 4] == "chd:":
             # child event
             if not self.options[EventType.Child]["enable"]:
-                return log_record
+                return None
             date_time = self._parse_datetime(date_time_token)
             log_record = ChildLogRecord(
                 log_type=log_type,
@@ -121,11 +127,12 @@ class EcflowLogParser(object):
                 line[start_pos:],
                 debug=self.options[EventType.Child]["debug"],
             )
+            return log_record
         elif line[start_pos: start_pos + 4] == "svr:":
             # server
             # MSG:[05:41:25 2.2.2020] svr:check_pt in 0 seconds
             if not self.options[EventType.Server]["enable"]:
-                return log_record
+                return None
             date_time = self._parse_datetime(date_time_token)
             log_record = ServerLogRecord(
                 log_type=log_type,
@@ -138,6 +145,7 @@ class EcflowLogParser(object):
                 line[start_pos:],
                 debug=self.options[EventType.Server]["debug"],
             )
+            return log_record
         elif len(line[start_pos:].strip()) > 0:
             # date_time = self._parse_datetime(date_time_token)
             # log_record.date = date_time.date()
@@ -158,7 +166,8 @@ class EcflowLogParser(object):
             # not supported
             # print("[not supported]", line)
             pass
-
+        if not self.options[EventType.Unknown]["enable"]:
+            return None
         return log_record
 
     def _parse_log_type(self, token: str) -> LogType:
