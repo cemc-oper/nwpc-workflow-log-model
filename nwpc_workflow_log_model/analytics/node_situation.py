@@ -12,7 +12,7 @@ from .situation_type import (
 
 class TimePoint(object):
     """
-    时间点，表示在某时间点（time）的状态（status）
+    Time point, indicating the state (NodeStatus) at a certain time point (time)
     """
     def __init__(
             self,
@@ -28,7 +28,7 @@ class TimePoint(object):
 
 class TimePeriodType(Enum):
     """
-    时间段类型
+    Time period type
     """
     InSubmitted = "in_submitted"
     InActive = "in_active"
@@ -37,7 +37,7 @@ class TimePeriodType(Enum):
 
 class TimePeriod(object):
     """
-    时间段
+    Time period
     """
     def __init__(
             self,
@@ -52,7 +52,7 @@ class TimePeriod(object):
 
 class NodeSituation(object):
     """
-    节点运行状态，根据节点状态序列分析得到。
+    The running situation of the node which can be obtained by analyzing the NodeState sequence.
     """
     def __init__(
             self,

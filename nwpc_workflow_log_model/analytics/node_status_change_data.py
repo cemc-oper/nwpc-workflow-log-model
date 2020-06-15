@@ -7,7 +7,8 @@ from nwpc_workflow_model.node_status import NodeStatus
 
 class NodeStatusChangeData(ABC):
     """
-    节点状态变化数据的接口，表示节点在某个时间点（date_time）变为新的状态（status: NodeStatus）
+    An interface of node status change data.
+    indicating that the node changes to a new state (status: NodeStatus) at a certain time point (date_time)
     """
     @property
     @abstractmethod

@@ -14,8 +14,8 @@ from .node_status_change_data import NodeStatusChangeData
 
 class TaskStatusChangeDFA(object):
     """
-    根据 NodeStatusChangeData 数据分析 Task 节点的运行状态。
-    基于有限状态机（DFA）实现。
+    According to the NodeStatusChangeData data, analyze the running situation of the Task node.
+    Implemented based on Deterministic Finite Automaton (DFA).
     """
     def __init__(self, name):
         self.name = name
@@ -119,8 +119,9 @@ class TaskStatusChangeDFA(object):
         )
 
         # submitted enters Submit directly
-        #   有些系统没有显示指定housekeep任务时间，所有时次结束直接进入下一次循环，
-        #   导致第二天的日志中没有queued条目。
+        #   Some systems do not specify startup time for housekeep task,
+        #   and the system directly goes into the next day after all cycles today finish,
+        #   resulting in no queued entry in the log the next day.
         self.machine.add_transition(
             trigger=NodeStatus.submitted.value,
             source=source,
