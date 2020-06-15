@@ -74,7 +74,7 @@ class EcflowLogParser(object):
 
         start_pos = end_pos + 2
         if line[start_pos: start_pos + 1] == " ":
-            if not self.options[EventType.Server]["enable"]:
+            if not self.options[EventType.Status]["enable"]:
                 return log_record
             date_time = self._parse_datetime(date_time_token)
             log_record = StatusLogRecord(
@@ -84,7 +84,10 @@ class EcflowLogParser(object):
                 log_record=line,
             )
             start_pos += 1
-            log_record.parse_record(line[start_pos:])
+            log_record.parse_record(
+                line[start_pos:],
+                debug=self.options[EventType.Status]["debug"],
+            )
         elif line[start_pos: start_pos + 2] == "--":
             if not self.options[EventType.Client]["enable"]:
                 return log_record
@@ -129,7 +132,10 @@ class EcflowLogParser(object):
                 log_record=line,
             )
             start_pos += 4
-            log_record.parse_record(line[start_pos:])
+            log_record.parse_record(
+                line[start_pos:],
+                debug=self.options[EventType.Server]["debug"],
+            )
         elif len(line[start_pos:].strip()) > 0:
             # date_time = self._parse_datetime(date_time_token)
             # log_record.date = date_time.date()

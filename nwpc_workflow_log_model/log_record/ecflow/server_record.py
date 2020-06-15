@@ -1,13 +1,17 @@
+import datetime
+
+from loguru import logger
+
 from .record import EcflowLogRecord, LogType, EventType
 
 
 class ServerLogRecord(EcflowLogRecord):
     def __init__(
             self,
-            log_type=LogType.Unknown,
-            date=None,
-            time=None,
-            log_record=None
+            log_type: LogType = LogType.Unknown,
+            date: datetime.date = None,
+            time: datetime.time = None,
+            log_record: str = None
     ):
         EcflowLogRecord.__init__(
             self,
@@ -19,11 +23,16 @@ class ServerLogRecord(EcflowLogRecord):
         self.event_type = EventType.Server
         self.command = None
 
-    def parse_record(self, line: str):
+    def parse_record(
+            self,
+            line: str,
+            debug: bool = False
+    ):
         start_pos = 0
         end_pos = line.find(" ", start_pos)
         if end_pos == -1:
-            # print("[ERROR] child record: event not found =>", self.log_record)
+            if debug:
+                logger.error(f"[ERROR] child record: event not found => {self.log_record}")
             return
         event = line[start_pos:end_pos]
         self.event = event

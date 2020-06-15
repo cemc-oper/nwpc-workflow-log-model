@@ -1,9 +1,11 @@
 import datetime
 
-from .record import EcflowLogRecord, LogType, EventType
-from nwpc_workflow_log_model.analytics.node_status_change_data import NodeStatusChangeData
+from loguru import logger
 
 from nwpc_workflow_model.node_status import NodeStatus
+
+from nwpc_workflow_log_model.analytics.node_status_change_data import NodeStatusChangeData
+from .record import EcflowLogRecord, LogType, EventType
 
 
 class StatusLogRecord(EcflowLogRecord):
@@ -24,7 +26,11 @@ class StatusLogRecord(EcflowLogRecord):
         self.event_type: EventType = EventType.Status
         self.status: NodeStatus = NodeStatus.unknown
 
-    def parse_record(self, status_line: str):
+    def parse_record(
+            self,
+            status_line: str,
+            debug: bool = False,
+    ):
         """
         Parse status record
 
@@ -40,14 +46,19 @@ class StatusLogRecord(EcflowLogRecord):
             subset of log record line without log type and datetime, such as:
                 complete: /grapes_reps_v3_2/06/control/pre_data/psi
                 submitted: /grapes_geps_v1_2/12/members/pair_06/mem02/geps2tigge/geps2tigge_054 job_size:31866
+        debug: bool
+            show debug information
         """
         start_pos = 0
         end_pos = status_line.find(":", start_pos)
         if end_pos == -1:
             if status_line.strip()[0].isupper():
+                if debug:
+                    logger.warning(f"[WARNING] status record: event is ignored => {self.log_record}")
                 pass
             else:
-                # print("[ERROR] status record: event not found =>", self.log_record)
+                if debug:
+                    logger.error(f"[ERROR] status record: event not found => {self.log_record}")
                 pass
             return
         event = status_line[start_pos:end_pos]
@@ -100,7 +111,8 @@ class StatusLogRecord(EcflowLogRecord):
             pass
         else:
             self.event = event
-            # print("[ERROR] status record: event not supported =>", self.log_record)
+            if debug:
+                logger.error(f"[ERROR] status record: event not supported =>  {self.log_record}")
 
 
 @NodeStatusChangeData.register
