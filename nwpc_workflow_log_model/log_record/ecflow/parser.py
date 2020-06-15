@@ -16,22 +16,22 @@ class EcflowLogParser(object):
     def __init__(self, options: dict = None):
         self.options = {
             "parser": {
-                "debug": True,
+                "debug": False,
             },
             EventType.Status: {
-                "debug": True,
+                "debug": False,
                 "enable": True,
             },
             EventType.Client: {
-                "debug": True,
+                "debug": False,
                 "enable": True,
             },
             EventType.Child: {
-                "debug": True,
+                "debug": False,
                 "enable": True,
             },
             EventType.Server: {
-                "debug": True,
+                "debug": False,
                 "enable": True,
             }
         }
