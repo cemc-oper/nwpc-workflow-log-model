@@ -9,11 +9,11 @@ from .status_record import StatusLogRecord
 from .client_record import ClientLogRecord
 from .child_record import ChildLogRecord
 from .server_record import ServerLogRecord
-from .util import convert_ecflow_log_type, EventType
+from .util import convert_ecflow_log_type, EventType, merge_dict
 
 
 class EcflowLogParser(object):
-    def __init__(self):
+    def __init__(self, options: dict = None):
         self.options = {
             "parser": {
                 "debug": True,
@@ -35,6 +35,8 @@ class EcflowLogParser(object):
                 "enable": True,
             }
         }
+        if options is not None:
+            merge_dict(self.options, options)
 
     def disable_event_parse(self, event_type):
         self.options[event_type]["enable"] = False
