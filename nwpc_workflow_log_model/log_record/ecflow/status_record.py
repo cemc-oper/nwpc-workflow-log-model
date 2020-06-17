@@ -69,7 +69,7 @@ class StatusLogRecord(EcflowLogRecord):
             start_pos = end_pos + 2
             end_pos = status_line.find(" ", start_pos)
             if end_pos == -1:
-                # LOG:[23:12:00 9.10.2018] queued: /grapes_meso_3km_post/18/tograph/1h/prep_1h_10mw
+                # LOG:[23:12:00 9.10.2018]  queued: /grapes_meso_3km_post/18/tograph/1h/prep_1h_10mw
                 self.node_path = status_line[start_pos:].strip()
             else:
                 # LOG:[11:09:31 20.9.2018]  aborted: /grapes_meso_3km_post/06/tograph/3h/prep_3h_10mw/plot_hour_030 try-no: 1 reason: trap
