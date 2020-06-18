@@ -46,6 +46,26 @@ def test_submit_with_job_size():
     assert record.additional_attrs["job_size"] == 31866
 
 
+def test_aborted():
+    line = "LOG:[05:20:57 19.5.2020]  aborted: /meso_post/03/uploadAll/upload_chartos/3h/prep_3hr/upload_prep_3hr_020 try-no: 1 reason: trap"
+    parser = EcflowLogParser()
+    record = parser.parse(line)
+    assert record is not None
+    assert isinstance(record, StatusLogRecord)
+
+    attrs = {
+        "event_type": EventType.Status,
+        "node_path": "/meso_post/03/uploadAll/upload_chartos/3h/prep_3hr/upload_prep_3hr_020",
+        "status": NodeStatus.aborted,
+        "event": "aborted",
+    }
+
+    _check_attrs_value(record, attrs)
+
+    assert record.additional_attrs["try_no"] == 1
+    assert record.additional_attrs["reason"] == "trap"
+
+
 def test_status_change_entry():
     line = "LOG:[13:28:29 8.1.2020]  submitted: /gmf_grapes_gfs_post/06"
     parser = EcflowLogParser()

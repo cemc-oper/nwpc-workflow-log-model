@@ -36,9 +36,16 @@ class StatusLogRecord(EcflowLogRecord):
 
         Example:
             LOG:[13:34:07 8.1.2020]  complete: /grapes_reps_v3_2/06/control/pre_data/psi
+            <EcflowLogParser.parse>  <-------   StatusLogRecord.parse_record   -------->
+
             LOG:[13:34:07 8.1.2020]  complete: /grapes_reps_v3_2/06/control/pre_data
+            <EcflowLogParser.parse>  <-----   StatusLogRecord.parse_record   ------>
+
             LOG:[13:34:07 8.1.2020]  queued: /grapes_reps_v3_2/06/control
+            <EcflowLogParser.parse>  <---StatusLogRecord.parse_record--->
+
             LOG:[17:38:08 28.1.2020]  submitted: /grapes_geps_v1_2/12/members/pair_06/mem02/geps2tigge/geps2tigge_054 job_size:31866
+            < EcflowLogParser.parse > <--------------------------   StatusLogRecord.parse_record   -------------------------------->
 
         Parameters
         ----------
@@ -63,19 +70,33 @@ class StatusLogRecord(EcflowLogRecord):
             return
         event = status_line[start_pos:end_pos]
 
-        if event in ("active", "queued", "complete", "aborted"):
+        if event in ("active", "queued", "complete"):
+            self.event = event
+            self.status = NodeStatus[event]
+            start_pos = end_pos + 2
+            end_pos = status_line.find(" ", start_pos)
+            # assert end_pos == -1
+            self.node_path = status_line[start_pos:end_pos].strip()
+        elif event == "aborted":
             self.event = event
             self.status = NodeStatus[event]
             start_pos = end_pos + 2
             end_pos = status_line.find(" ", start_pos)
             if end_pos == -1:
-                # LOG:[23:12:00 9.10.2018]  queued: /grapes_meso_3km_post/18/tograph/1h/prep_1h_10mw
+                # LOG:[05:20:57 19.5.2020]  aborted: /meso_post/03/uploadAll
                 self.node_path = status_line[start_pos:].strip()
             else:
-                # LOG:[11:09:31 20.9.2018]  aborted: /grapes_meso_3km_post/06/tograph/3h/prep_3h_10mw/plot_hour_030 try-no: 1 reason: trap
+                # LOG:[05:20:57 19.5.2020]  aborted: /meso_post/03/uploadAll/upload_chartos/3h/prep_3hr/upload_prep_3hr_020 try-no: 1 reason: trap
                 # LOG:[04:35:14 9.2.2020]  aborted: /gmf_grapes_gfs_post/00/upload/ftp_togrib2/upload_togrib2_global/upload_togrib2_069 try-no: 2 reason: trap
                 self.node_path = status_line[start_pos:end_pos]
-                self.additional_attrs["reason"] = status_line[end_pos + 1:]
+                start_pos = end_pos + 1
+                info = status_line[start_pos:].strip()
+                try_no_start = info.find("try_no: ")
+                reason_start = info.find("reason: ")
+                try_no = int(info[try_no_start + 8:reason_start].strip())
+                reason = info[reason_start + 8:].strip()
+                self.additional_attrs["reason"] = reason
+                self.additional_attrs["try_no"] = try_no
         elif event == "submitted":
             # LOG:[17:38:08 28.1.2020]  submitted: /grapes_geps_v1_2/12/members/pair_06/mem02/geps2tigge/geps2tigge_054 job_size:31866
             # LOG:[13:28:29 8.1.2020]  submitted: /gmf_grapes_gfs_post/06
