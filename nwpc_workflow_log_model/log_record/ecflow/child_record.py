@@ -87,7 +87,7 @@ class ChildLogRecord(EcflowLogRecord):
             tokens = line.split(" ")
             if len(tokens) == 2:
                 self.node_path = tokens[1]
-                self.additional_attrs["event_name"] = tokens[0]
+                self.additional_attrs["name"] = tokens[0]
             else:
                 if debug:
                     logger.debug(f"[ERROR] child record: parse error => {self.log_record}")
@@ -99,8 +99,8 @@ class ChildLogRecord(EcflowLogRecord):
             tokens = line.split(" ")
             if len(tokens) == 3:
                 self.node_path = tokens[2]
-                self.additional_attrs["meter_name"] = tokens[0]
-                self.additional_attrs["meter_value"] = int(tokens[1])
+                self.additional_attrs["name"] = tokens[0]
+                self.additional_attrs["value"] = int(tokens[1])
             else:
                 if debug:
                     logger.error(f"[ERROR] child record: parse error => {self.log_record}")
@@ -111,9 +111,9 @@ class ChildLogRecord(EcflowLogRecord):
             line = line[start_pos:]
             line = line.rstrip()
             name_end_pos = line.find(" ")
-            self.additional_attrs["label_name"] = line[:name_end_pos]
+            self.additional_attrs["name"] = line[:name_end_pos]
             node_start_pos = line.rfind(" ")
             self.node_path = line[node_start_pos+1:]
-            self.additional_attrs["label_value"] = line[name_end_pos+2: node_start_pos-1]
+            self.additional_attrs["value"] = line[name_end_pos+2: node_start_pos-1]
         else:
             logger.error("child record: event not supported =>", self.log_record)
