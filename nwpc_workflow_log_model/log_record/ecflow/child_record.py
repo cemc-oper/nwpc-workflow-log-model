@@ -29,7 +29,7 @@ class ChildLogRecord(EcflowLogRecord):
             debug: bool = False,
     ):
         """
-        Parse child line
+        Parse child command log record.
 
         Example lines:
             MSG:[13:33:57 8.1.2020] chd:init /grapes_reps_v3_2/06/members/mem09/pre_data/gmf_get/gmf_get_030
@@ -40,7 +40,8 @@ class ChildLogRecord(EcflowLogRecord):
         Parameters
         ----------
         line: str
-            part of log line after 'chd:'
+            part of log line after 'chd:', such as
+                "init /grapes_reps_v3_2/06/members/mem09/pre_data/gmf_get/gmf_get_030"
 
         debug: bool
             show debug information
@@ -76,8 +77,7 @@ class ChildLogRecord(EcflowLogRecord):
                 # MSG:[08:17:04 29.6.2018] chd:complete /gmf_grapes_025L60_v2.2_post/18/typhoon/post/tc_post
                 self.node_path = line[start_pos:].strip()
             else:
-                # MSG:[12:22:53 19.10.2018] chd:abort
-                #  /3km_post/06/3km_togrib2/grib2WORK/030/after_data2grib2_030  trap
+                # MSG:[12:22:53 19.10.2018] chd:abort /3km_post/06/3km_togrib2/grib2WORK/030/after_data2grib2_030  trap
                 self.node_path = line[start_pos:end_pos]
                 self.additional_attrs["reason"] = line[end_pos + 1:]
         elif event == "event":
