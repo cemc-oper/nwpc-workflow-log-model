@@ -33,14 +33,14 @@ class ClientLogRecord(EcflowLogRecord):
         Parse client record
 
         Example
+            MSG:[07:50:49 31.1.2020] --requeue force /grapes_reps_v3_2/00/control/model/fcst_monitor  :nwp_qu
+            <-EcflowLogParser.parse -> <----------------   ClientLogRecord.parse_record  ------------------->
+
             MSG:[06:35:57 12.1.2020] --force=complete /grapes_geps_v1_2/00/members/pair_05/mem02/model/forecast  :nwp
-            < EcflowLogParser.parse ><----------------------   ClientLogRecord.parse_record  ----------------------->
+            <-EcflowLogParser.parse -> <--------------------   ClientLogRecord.parse_record  ----------------------->
 
             MSG:[13:30:29 8.1.2020] --news=0 1 0  :nwp [:NO_NEWS]
-            <EcflowLogParser.parse> <ClientLogRecord.parse_record>
-
-            MSG:[13:30:35 8.1.2020] --server_version :nwp
-            MSG:[13:30:35 8.1.2020] --sync_full=0 :nwp
+            <-EcflowLogParser.parse-> <ClientLogRecord.parse_record>
 
         Parameters
         ----------
