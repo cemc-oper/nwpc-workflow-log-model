@@ -56,6 +56,7 @@ class ClientLogRecord(EcflowLogRecord):
             return
         event = line[start_pos:end_pos]
 
+        # TODO: MSG:[13:30:29 8.1.2020] --news=0 1 0  :nwp [:NO_NEWS]
         user_start_pos = line.rfind(":")
         if user_start_pos == -1:
             if debug:
