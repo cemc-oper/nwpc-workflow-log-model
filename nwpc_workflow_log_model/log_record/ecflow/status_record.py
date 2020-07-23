@@ -76,7 +76,7 @@ class StatusLogRecord(EcflowLogRecord):
             start_pos = end_pos + 2
             end_pos = status_line.find(" ", start_pos)
             # assert end_pos == -1
-            self.node_path = status_line[start_pos:end_pos].strip()
+            self.node_path = status_line[start_pos:].strip()
         elif event == "aborted":
             self.event = event
             self.status = NodeStatus[event]
