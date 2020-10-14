@@ -62,6 +62,7 @@ class EcflowLogParser(object):
         EcflowLogRecord or None
             if log line can't be parsed, return None.
         """
+        line = line.strip()
         log_record = EcflowLogRecord(log_record=line)
 
         start_pos = 0
