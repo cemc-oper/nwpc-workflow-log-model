@@ -38,3 +38,20 @@ def test_complete():
     }
 
     _check_attrs_value(record, attrs)
+
+
+def test_meter():
+    line = "MSG:[04:43:44 19.6.2020] chd:meter progress 10 /globalchartos/00/deterministic/base/000/wmc_wind_windbarb_700_sep_000"
+    parser = EcflowLogParser()
+    record = parser.parse(line)
+    assert record is not None
+    assert isinstance(record, ChildLogRecord)
+
+    attrs = {
+        "event_type": EventType.Child,
+        "node_path": "/globalchartos/00/deterministic/base/000/wmc_wind_windbarb_700_sep_000",
+        "command": "meter",
+        "event": "meter",
+    }
+
+    _check_attrs_value(record, attrs)
